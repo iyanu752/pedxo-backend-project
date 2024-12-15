@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateCreateDto {
+export class contractCreateDto {
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -48,10 +48,11 @@ export class CreateCreateDto {
   explanation: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  paymentAmount: number;
+  @IsString()
+  paymentAmount:string;
 
   @IsNotEmpty()
   @IsString()
   paymentFrequency: string;
+
 }

@@ -34,14 +34,17 @@ export class Contract {
   explanation: string;
 
   @Prop({ required: true, type: Number })
-  paymentAmount: number;
-
+  paymentAmount:string;
+  
   @Prop({})
   paymentFrequency: string;
 
   //this is going to be an image
   @Prop({})
-  signature: string;
+  signatureUrl: string;
+
+  @Prop({})
+  cloudinaryPublicId:string;
 }
 
 export const ContractSchema = SchemaFactory.createForClass(Contract);
