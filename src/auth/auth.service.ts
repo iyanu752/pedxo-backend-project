@@ -7,7 +7,7 @@ import {
 import { CreateUserDTO } from '../user/dto/create.user.dto';
 import { comparedHashed, HashData } from 'src/common/hashed/hashed.data';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDTO } from '../user/dto/login.user.dto';
+import { LoginUserDTO } from './dto/login.user.dto';
 import { UserService } from 'src/user/user.service';
 import { OtpService } from '../otp/service/otp.service';
 import {
@@ -55,7 +55,7 @@ export class AuthService {
     }
 
     if ((await comparedHashed(password, user.password)) === false) {
-      throw new BadRequestException('password do not matched');
+      throw new BadRequestException('Invalid Credentials');
     }
 
     if (!user.isEmailVerified) {
@@ -65,18 +65,16 @@ export class AuthService {
     }
 
     const randomToken = await generateRandomTokenForLoggedIn();
+    console.log(user)
 
     const token = await this.token(user);
 
     const accessToken = token.accessToken;
 
     const refreshToken = token.refreshToken;
-
     user.refreshToken = refreshToken;
     user.randomToken = randomToken;
-
     await user.save();
-
     return {
       user,
       accessToken,

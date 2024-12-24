@@ -21,7 +21,7 @@ import { AllUserDto, UserDto } from './dto/user.dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Serialize(AllUserDto)
   @Get()
   async getAll(): Promise<User[]> {
