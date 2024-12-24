@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from '../user/dto/create.user.dto';
-import { LoginUserDTO } from '../user/dto/login.user.dto';
+import { LoginUserDTO } from './dto/login.user.dto';
 import {
   ForgetPasswordDto,
   RequestOtpDto,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module} from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,7 +11,9 @@ import { OtpModule } from './otp/otp.module';
 import { OutSourceModule } from './outsource/outsource.module';
 import { BookDemoModule } from './bookdemo/module/demo.module';
 import { ContractModule } from './contracts/contract.module';
-
+import * as dotenv from "dotenv";
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+dotenv.config();
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,8 +35,10 @@ import { ContractModule } from './contracts/contract.module';
     OutSourceModule,
     BookDemoModule,
     ContractModule,
+    CloudinaryModule
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+}

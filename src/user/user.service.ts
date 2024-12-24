@@ -29,9 +29,9 @@ export class UserService {
     });
 
     const refreshToken = await this.token(result);
-
+    const accessToken = refreshToken.accessToken;
     result.refreshToken = refreshToken.refreshToken;
-
+    result.accessToken = accessToken;
     await result.save();
 
     await this.otpService.sendOtp({
@@ -40,7 +40,7 @@ export class UserService {
     });
 
     delete result['_doc'].password;
-    return 'success';
+    return {result, accessToken};
   }
 
   async getAll(): Promise<User[]> {
