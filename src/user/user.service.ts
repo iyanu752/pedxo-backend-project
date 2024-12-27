@@ -40,7 +40,7 @@ export class UserService {
     });
 
     delete result['_doc'].password;
-    return {result, accessToken};
+    return {result, accessToken}; 
   }
 
   async getAll(): Promise<User[]> {

@@ -65,18 +65,16 @@ export class AuthService {
     }
 
     const randomToken = await generateRandomTokenForLoggedIn();
-    console.log(user)
 
     const token = await this.token(user);
-
     const accessToken = token.accessToken;
-
     const refreshToken = token.refreshToken;
     user.refreshToken = refreshToken;
     user.randomToken = randomToken;
     await user.save();
     return {
-      user,
+      name:"khaldi",
+      result:user,
       accessToken,
     };
   }

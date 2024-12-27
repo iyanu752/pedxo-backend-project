@@ -50,11 +50,17 @@ export class user {
 
   @Expose()
   randomToken: string;
+
+  @Expose()
+  accessToken: string;
+
+  @Expose()
+  refreshToken: string;
 }
 export class LoginResponse {
   @Expose()
   @Type(() => user)
-  user: user;
+  result: user;
 
   @Expose()
   accessToken: string;
