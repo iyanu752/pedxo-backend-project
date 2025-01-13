@@ -2,5 +2,5 @@ Pedxo
 
 Our software helps clients to hire and manage their engineers remotely (CLM).
 
-Features include: Contract creation and agreement managment,
+Features include: Contract creation, agreement managment,
 personlized enginner recommendation, automated hiring, payroll and compensation managment.
