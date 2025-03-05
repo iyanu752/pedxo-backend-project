@@ -1,50 +1,51 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
+import { Document } from 'mongoose';
+
 export type ContractDocument = Contract & Document;
+
 @Schema({ timestamps: true })
 export class Contract {
-  @Prop({ required: true, type: String })
-  name: string;
+  @Prop({ required: true })
+  clientName: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: true, type: String })
-  country: string;
+  @Prop({ required: true })
+  location: string;
 
-  @Prop({ required: true, type: String })
-  region: string;
+  @Prop()
+  region?: string;
 
-  @Prop({ type: String })
-  role: string;
+  @Prop()
+  roleTitle?: string;
 
-  @Prop({ type: String })
-  level: string;
+  @Prop()
+  seniorityLevel?: string;
 
-  @Prop({ type: String })
-  scope: string;
+  @Prop({ required: true })
+  scopeOfWork: string;
 
-  @Prop({ type: Date })
+  @Prop({ required: true })
   startDate: Date;
 
-  @Prop({ type: Date })
-  endDate: Date;
+  @Prop()
+  endDate?: Date;
 
-  @Prop({ required: true, type: String })
-  explanation: string;
+  @Prop({ required: true })
+  paymentRate: number;
 
-  @Prop({ required: true, type: Number })
-  paymentAmount:string;
-  
-  @Prop({})
+  @Prop({ required: true })
   paymentFrequency: string;
 
-  //this is going to be an image
-  @Prop({})
-  signatureUrl: string;
+  @Prop()
+  signature?: string; // Base64 or URL to saved signature image
 
-  @Prop({})
-  cloudinaryPublicId:string;
+  @Prop({ default: 'personal-info' }) // Tracks progress
+  progress: 'personal-info' | 'job-details' | 'compensation' | 'review' | 'signed';
+
+  @Prop({ default: false }) // Marks contract as completed
+  isCompleted: boolean;
 }
 
 export const ContractSchema = SchemaFactory.createForClass(Contract);
