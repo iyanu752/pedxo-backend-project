@@ -23,19 +23,19 @@ export class Contract {
   @Prop()
   seniorityLevel?: string;
 
-  @Prop({ required: true })
+  @Prop()
   scopeOfWork: string;
 
-  @Prop({ required: true })
+  @Prop()
   startDate: Date;
 
   @Prop()
   endDate?: Date;
 
-  @Prop({ required: true })
+  @Prop()
   paymentRate: number;
 
-  @Prop({ required: true })
+  @Prop()
   paymentFrequency: string;
 
   @Prop()

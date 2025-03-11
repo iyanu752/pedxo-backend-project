@@ -6,14 +6,15 @@ import { PersonalInfoDto } from './dto/personal-info.dto';
 import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
 import { SignatureDto } from './dto/signature.dto';
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { S3Service } from 'src/s3service/s3service.service';
+import {ContractEmailDto} from "./dto/contract.email.dto"
+import {MailService} from "../common/mail.service"
 @Injectable()
 export class ContractService {
   constructor(
-    @InjectModel(Contract.name)
     @InjectModel(Contract.name) private contractModel: Model<ContractDocument>,
-    private readonly cloudinary : CloudinaryService
+    private s3service:S3Service,
+    private mailservice:MailService
   ) {}
   async createOrUpdatePersonalInfo(dto: PersonalInfoDto) {
     let contract = await this.contractModel.findOne({ email: dto.email });
@@ -39,13 +40,20 @@ export class ContractService {
     return this.updateContract(email, dto, 'review');
   }
 
-  async submitSignature(dto: SignatureDto) {
+  async submitSignature(email: string,file) {
+    const signatureUrl = await this.s3service.uploadSignature(file);
+   console.log(email)
     const contract = await this.contractModel.findOneAndUpdate(
-      { email: dto.email },
-      { $set: { signature: dto.signature, progress: 'signed' } },
-      { new: true }
+      { email }, // Find the contract by email
+      { 
+        $set: { 
+          signature: signatureUrl, // Store the signature URL
+          progress: 'signed' // Update progress to 'signed'
+        } 
+      },
+      { new: true } // Return the updated document
     );
-
+  
     if (!contract) throw new NotFoundException('Contract not found');
     return contract;
   }
@@ -56,8 +64,9 @@ export class ContractService {
       { $set: { isCompleted: true } },
       { new: true }
     );
-
     if (!contract) throw new NotFoundException('Contract not found');
+    const contractDto = new ContractEmailDto(contract);
+    await this.mailservice.sendContractEmail(contractDto);
     return contract;
   }
 
@@ -77,6 +86,8 @@ export class ContractService {
     if (!contract) throw new NotFoundException('Contract not found');
     return contract;
   }
+
+
   // async createContract(file:Express.Multer.File, contractDetails:contractCreateDto) {
   //   try {
   //     let result = await this.cloudinary.uploadFile(file,"signatures")

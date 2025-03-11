@@ -11,8 +11,9 @@ import { OtpModule } from './otp/otp.module';
 import { OutSourceModule } from './outsource/outsource.module';
 import { BookDemoModule } from './bookdemo/module/demo.module';
 import { ContractModule } from './contracts/contract.module';
+import { S3Service } from './s3service/s3service.service';
+import { S3serviceModule } from './s3service/s3service.module';
 import * as dotenv from "dotenv";
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
 dotenv.config();
 @Module({
   imports: [
@@ -35,10 +36,10 @@ dotenv.config();
     OutSourceModule,
     BookDemoModule,
     ContractModule,
-    CloudinaryModule
+    S3serviceModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [S3Service],
 })
 export class AppModule {
 }
