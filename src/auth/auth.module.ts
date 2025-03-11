@@ -10,6 +10,8 @@ import { UserModule } from 'src/user/user.module';
 import { OtpModule } from 'src/otp/otp.module';
 import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
+import { JWTAuthGuard } from './customGuard/jwt.guard';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 //module decorator
 @Module({
@@ -25,6 +27,6 @@ import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
     OtpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard, RefreshTokenStrategy],
+  providers: [AuthService, AuthGuard, RefreshTokenStrategy,JWTAuthGuard,JwtStrategy],
 })
 export class AuthModule {}
