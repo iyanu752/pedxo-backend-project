@@ -18,7 +18,6 @@ import { ContractService } from './contract.service';
 import { PersonalInfoDto } from './dto/personal-info.dto';
 import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
-import { SignatureDto } from './dto/signature.dto';
 import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import {S3Service} from "../s3service/s3service.service"
 const fileFilter = (req, file, callback) => {
