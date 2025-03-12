@@ -84,8 +84,9 @@ export class ContractController {
   }
 
   @UseGuards(JWTAuthGuard)
-  @Get(':email')
-  getContract(@Param('email') email: string) {
+  @Get('')
+  getContract(@Req() req) { 
+    let email  = req.user.email
     return this.contractService.getContract(email);
   }
 
