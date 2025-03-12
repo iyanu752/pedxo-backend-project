@@ -7,7 +7,7 @@ import { ContractService } from './contract.service'
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { S3serviceModule } from 'src/s3service/s3service.module';
-import { MailService } from '../common/mail.service';
+import { EmailService } from '../common/email.service';
 @Module({
   imports: [
     AuthModule,JwtModule,
@@ -17,6 +17,6 @@ import { MailService } from '../common/mail.service';
     S3serviceModule
   ],
   controllers: [ContractController],
-  providers: [ContractService,MailService],
+  providers: [ContractService,EmailService],
 })
 export class ContractModule {}

@@ -3,16 +3,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BookDemo, BookDemoSchema } from '../schema/demo.schema';
 import { BookDemoController } from '../controller/demo.controller';
 import { BookDemoService } from '../service/demo.service';
-import { MailModule } from 'src/node-mailer/mailer.module';
+import { EmailService } from 'src/common/email.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: BookDemo.name, schema: BookDemoSchema },
     ]),
-    MailModule,
   ],
   controllers: [BookDemoController],
-  providers: [BookDemoService],
+  providers: [BookDemoService,EmailService],
 })
 export class BookDemoModule {}

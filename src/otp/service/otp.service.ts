@@ -12,7 +12,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { OTP, OtpDocument } from '../schema/otp.schema';
 import { Model } from 'mongoose';
-import { EmailService } from 'src/node-mailer/service/email.service';
 import { OtpType } from '../enum/opt.type.enum';
 import {
   generateResetOTP,
@@ -20,12 +19,13 @@ import {
 } from 'src/common/constant/generate.string';
 import { welcomeMessage } from 'src/common/constant/message/welcome.message';
 import { resetPasswordMessage } from 'src/common/constant/message/reset-password.message';
+import { EmailService } from 'src/common/email.service';
 
 @Injectable()
 export class OtpService {
   constructor(
     @InjectModel(OTP.name) private otpModel: Model<OtpDocument>,
-    private mailService: EmailService,
+    private emailService: EmailService,
   ) {}
 
   async createOtp(payload: CreateOtpDTO) {
@@ -95,7 +95,7 @@ export class OtpService {
       throw new InternalServerErrorException('error occur while sending otp');
     }
 
-    await this.mailService.sendMessage(email, subject, template);
+    await this.emailService.sendMail(email, subject, template);
 
     return true;
   }

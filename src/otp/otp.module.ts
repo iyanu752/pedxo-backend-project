@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OTP, OtpSchema } from './schema/otp.schema';
-import { MailModule } from 'src/node-mailer/mailer.module';
 import { OtpService } from './service/otp.service';
+import { EmailService } from 'src/common/email.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: OTP.name, schema: OtpSchema }]),
-    MailModule,
   ],
   controllers: [],
-  providers: [OtpService],
+  providers: [OtpService,EmailService],
   exports: [OtpService],
 })
 export class OtpModule {}

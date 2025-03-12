@@ -2,8 +2,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 export const ENVIRONMENT = {
   GOOGLE: {
-    SMTP_USER: process.env.SMTP_USER,
-    AUTH_PASS: process.env.AUTH_PASS,
+    SMTP_USER: process.env.GMAIL_USER,
+    AUTH_PASS: process.env.GMAIL_PASSWORD,
   },
 
   CONNECTION: {
