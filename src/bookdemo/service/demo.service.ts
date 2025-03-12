@@ -4,14 +4,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { BookDemo, BookDemoDocument } from '../schema/demo.schema';
 import { Model } from 'mongoose';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
-import { EmailService } from 'src/node-mailer/service/email.service';
 import { ResponseMessage } from 'src/common/constant/message/message.constant';
+import { EmailService } from 'src/common/email.service';
 
 @Injectable()
 export class BookDemoService {
   constructor(
     @InjectModel(BookDemo.name) private demoModel: Model<BookDemoDocument>,
-    private emailService: EmailService,
+    private readonly emailService : EmailService
   ) {}
 
   async bookdemo(payload: BookDemoDto) {
@@ -31,29 +31,28 @@ export class BookDemoService {
     }
 
     const ownerEmail = ENVIRONMENT.OWNER.OWNER_EMAIL;
-
-    const demoBooker = await this.emailService.sendMessage(
+    const demoBooker = await this.emailService.sendMail(
       demo.email,
       ResponseMessage.demoSubject,
       await ResponseMessage.responseToBooker(pick_date),
     );
 
-    if (demoBooker) {
-      await this.emailService.sendMessage(
-        ownerEmail,
-        ResponseMessage.demoSubject,
-        ResponseMessage.toOwnerDemoTemplate(
-          full_Name,
-          pick_date,
-          company_name,
-          phoneNumber,
-          knowUs,
-          employeeCount,
-          email,
-          job_title,
-        ),
-      );
-    }
+    // if (demoBooker) {
+    //   await this.emailService.sendMail(
+    //     ownerEmail,
+    //     ResponseMessage.demoSubject,
+    //     ResponseMessage.toOwnerDemoTemplate(
+    //       full_Name,
+    //       pick_date,
+    //       company_name,
+    //       phoneNumber,
+    //       knowUs,
+    //       employeeCount,
+    //       email,
+    //       job_title,
+    //     ),
+    //   );
+    // }
 
     return `Demo Booked Successfully`;
   }

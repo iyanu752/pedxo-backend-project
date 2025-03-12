@@ -5,16 +5,15 @@ import { Contract, ContractDocument } from './schemas/contract.schema';
 import { PersonalInfoDto } from './dto/personal-info.dto';
 import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
-import { SignatureDto } from './dto/signature.dto';
 import { S3Service } from 'src/s3service/s3service.service';
 import {ContractEmailDto} from "./dto/contract.email.dto"
-import {MailService} from "../common/mail.service"
+import {EmailService} from "../common/email.service"
 @Injectable()
 export class ContractService {
   constructor(
     @InjectModel(Contract.name) private contractModel: Model<ContractDocument>,
     private s3service:S3Service,
-    private mailservice:MailService
+    private emailservice:EmailService
   ) {}
   async createOrUpdatePersonalInfo(dto: PersonalInfoDto) {
     let contract = await this.contractModel.findOne({ email: dto.email });
@@ -66,7 +65,7 @@ export class ContractService {
     );
     if (!contract) throw new NotFoundException('Contract not found');
     const contractDto = new ContractEmailDto(contract);
-    await this.mailservice.sendContractEmail(contractDto);
+    await this.emailservice.sendContractEmail(contractDto);
     return contract;
   }
 

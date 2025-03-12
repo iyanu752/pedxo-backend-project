@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { OutSource, OutSourceDocument } from './schema/outsource.schema';
 import { Model } from 'mongoose';
 import { OutSourceDto } from './dto/outsource.dto';
-import { EmailService } from 'src/node-mailer/service/email.service';
 import { ResponseMessage } from 'src/common/constant/message/message.constant';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
+import { EmailService } from 'src/common/email.service';
 
 @Injectable()
 export class OutSourceService {
@@ -33,13 +33,13 @@ export class OutSourceService {
 
     const ownerEmail = ENVIRONMENT.OWNER.OWNER_EMAIL;
 
-    await this.emailService.sendMessage(
+    await this.emailService.sendMail(
       email,
       ResponseMessage.outSourceSubject,
       await ResponseMessage.responseToOutSource(),
     );
 
-    await this.emailService.sendMessage(
+    await this.emailService.sendMail(
       ownerEmail,
       ResponseMessage.outSourceSubject,
       await ResponseMessage.toOwnerOutSourceTemplate(
