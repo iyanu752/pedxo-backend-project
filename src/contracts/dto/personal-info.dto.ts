@@ -11,9 +11,18 @@ export class PersonalInfoDto {
 
   @IsString()
   @IsNotEmpty()
-  location: string;
+  country: string;
 
   @IsString()
-  @IsOptional()
-  region?: string;
+  @IsNotEmpty()
+  region: string;
+
+  @IsString()
+  @IsNotEmpty()
+  companyName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  contractType:string;
+
 }
