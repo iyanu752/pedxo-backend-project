@@ -65,7 +65,7 @@ export class TalentService {
   async update(user: User, body: UpdateDto) {
     const userId = user._id;
     const [userExist, updateTalent] = await Promise.all([
-      this.userService.getById(userId),
+      this.userService.findUserById(userId),
       this.talentModel.findOneAndUpdate({ userId }, { body }, { new: true }),
     ]);
 
@@ -87,7 +87,7 @@ export class TalentService {
     );
     if (approved) {
       const userId = approved.userId;
-      await this.userService.approvedUserAsTalent(userId.toString());
+      await this.userService.approveUserAsTalent(userId.toString());
     }
     return approved;
   }
