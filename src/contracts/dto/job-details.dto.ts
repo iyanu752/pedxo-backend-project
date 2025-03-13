@@ -23,5 +23,5 @@ export class JobDetailsDto {
 
   @IsString()
   @IsNotEmpty()
-  explanation: string;
+  explanationOfScopeOfWork: string;
 }

@@ -24,9 +24,12 @@ export class ContractService {
     }
 
     contract.clientName = dto.clientName;
-    contract.location = dto.location;
+    contract.country = dto.country;
     contract.region = dto.region ?? contract.region;
+    contract.companyName = dto.companyName;
     contract.progress = 'job-details';
+    contract.contractType = dto.contractType;
+
 
     return contract.save();
   }

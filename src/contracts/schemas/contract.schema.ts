@@ -12,10 +12,16 @@ export class Contract {
   email: string;
 
   @Prop({ required: true })
-  location: string;
+  country: string;
 
   @Prop()
   region?: string;
+
+  @Prop()
+  companyName: string;
+
+  @Prop()
+  contractType: string;
 
   @Prop()
   roleTitle?: string;
@@ -25,6 +31,9 @@ export class Contract {
 
   @Prop()
   scopeOfWork: string;
+
+  @Prop()
+  explanationOfScopeOfWork: string;
 
   @Prop()
   startDate: Date;

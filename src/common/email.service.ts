@@ -29,21 +29,31 @@ export class EmailService {
 
   async sendContractEmail(contractDto: ContractEmailDto): Promise<void> {
     const emailBody = `
-      <h1>Hello Victor,</h1>
-      <h3>Here are the details of ${contractDto.clientName}"s contract:</h3>
-      <ul>
-        <li><strong>Location:</strong> ${contractDto.location}</li>
-        <li><strong>Role:</strong> ${contractDto.roleTitle || 'N/A'}</li>
-        <li><strong>Seniority Level:</strong> ${contractDto.seniorityLevel || 'N/A'}</li>
-        <li><strong>Scope of Work:</strong> ${contractDto.scopeOfWork}</li>
-        <li><strong>Start Date:</strong> ${contractDto.startDate}</li>
-        <li><strong>End Date:</strong> ${contractDto.endDate || 'N/A'}</li>
-        <li><strong>Payment Rate:</strong> ${contractDto.paymentRate} per ${contractDto.paymentFrequency}</li>
-        <li><strong>Contract Status:</strong> ${contractDto.isCompleted ? 'Completed' : 'In Progress'}</li>
-      </ul>
-      ${contractDto.signature ? `<p><strong>Signature:</strong> <img src="${contractDto.signature}" alt="Signature" width="150"/></p>` : ''}
-      <p>Thank you.</p>`;
+    <h1>New Onboarding Request</h1>
 
+    <h2>Personal Details</h2>
+    <p><strong>Client Name:</strong> ${contractDto.clientName}</p>
+    <p><strong>Email:</strong> ${contractDto.email}</p>
+    <p><strong>Country:</strong> ${contractDto.country}</p>
+    <p><strong>State:</strong> ${contractDto.region}</p>
+    <p><strong>Company Name:</strong> ${contractDto.companyName}</p>
+
+    <h2>${contractDto.contractType} Contract</h2>
+    <p><strong>Role Title:</strong> ${contractDto.roleTitle || 'N/A'}</p>
+    <p><strong>Seniority Level:</strong> ${contractDto.seniorityLevel || 'N/A'}</p>
+    <p><strong>Scope Of Explanation And Tech Stack Requirements:</strong> ${contractDto.scopeOfWork} <br></p>
+
+    <h2>Project Timeline</h2>
+    <p><strong>Start Date:</strong> ${contractDto.startDate}</p>
+    <p><strong>End Date:</strong> ${contractDto.endDate || 'N/A'}</p>
+    <p><strong>Explanation of Scope of Work:</strong> ${contractDto.explanationOfScopeOfWork}</p>
+
+    <h2>Compensation and Budget</h2>
+    <p><strong>Payment Rate:</strong> ${contractDto.paymentRate}</p>
+    <p><strong>Payment Frequency:</strong> ${contractDto.paymentFrequency}</p>
+
+    <p>Thank you.</p>
+  `;
     await this.sendMail(process.env.OWNER_EMAIL, 'New Onboarding Request', emailBody);
   }
 
