@@ -4,7 +4,7 @@ import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { CreateUserDTO } from './dto/create.user.dto';
 import { HashData } from 'src/common/hashed/hashed.data';
-import { Update } from './dto/update.user.dto';
+import { UpdateUserDTO } from './dto/update.user.dto';
 import { OtpService } from 'src/otp/service/otp.service';
 import { OtpType } from 'src/otp/enum/opt.type.enum';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
@@ -15,150 +15,177 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private otpService: OtpService,
-    private jwt: JwtService,
+    private jwtService: JwtService,
   ) {}
 
-  async create(payload: CreateUserDTO) {
+  /**
+   * Registers a new user, hashes their password, and sends an OTP for email verification.
+   */
+  async registerUser(payload: CreateUserDTO) {
     const { password } = payload;
 
-    const hashPassword = await HashData(password);
+    const hashedPassword = await HashData(password);
 
-    const result = await this.userModel.create({
+    const newUser = await this.userModel.create({
       ...payload,
-      password: hashPassword,
+      password: hashedPassword,
     });
 
-    const refreshToken = await this.token(result);
-    const accessToken = refreshToken.accessToken;
-    result.refreshToken = refreshToken.refreshToken;
-    result.accessToken = accessToken;
-    await result.save();
+    const tokenData = await this.generateAuthTokens(newUser);
+    newUser.refreshToken = tokenData.refreshToken;
+    newUser.accessToken = tokenData.accessToken;
+    await newUser.save();
 
     await this.otpService.sendOtp({
-      email: result.email,
+      email: newUser.email,
       type: OtpType.EMAIL_VERIFICATION,
     });
 
-    delete result['_doc'].password;
-    return {result, accessToken}; 
+    delete newUser['_doc'].password;
+    return { newUser, accessToken: tokenData.accessToken };
   }
 
-  async getAll(): Promise<User[]> {
-    const user = await this.userModel.find();
-    return user;
+  /**
+   * Fetches all users from the database.
+   */
+  async fetchAllUsers(): Promise<User[]> {
+    return this.userModel.find();
   }
 
-  async getByEmailOrUserName(email?: string, userName?: string): Promise<User> {
-    const user = await this.userModel
-      .findOne({ $or: [{ email }, { userName }] })
-      .lean();
-    return user;
+  /**
+   * Finds a user by email or username.
+   */
+  async checkIfUserExists(email?: string): Promise<User | null> {
+    if (!email) {
+      throw new Error("Either email or username must be provided");
+    }
+
+    return this.userModel.findOne({email}).exec();
   }
 
-  async update(payload: Update, user: User) {
+  /**
+   * Updates a user's profile.
+   */
+  async updateUserProfile(updateData: UpdateUserDTO, user: User) {
     try {
-      const id = user._id.toString();
       const updatedUser = await this.userModel.findByIdAndUpdate(
-        id,
-        { ...payload },
+        user._id.toString(),
+        { ...updateData },
         { new: true },
       );
 
       if (!updatedUser) {
-        return { Response: 'User not found or update failed.' };
+        return { message: 'User not found or update failed.' };
       }
 
       return {
-        Response: `Profile successfully updated with the following changes: ${JSON.stringify(payload)}`,
+        message: `Profile successfully updated with the following changes: ${JSON.stringify(updateData)}`,
         updatedUser,
       };
     } catch (error) {
-      return { Response: `An error occurred during update: ${error.message}` };
+      return { message: `An error occurred during update: ${error.message}` };
     }
   }
-  async getById(id: string) {
+
+  /**
+   * Retrieves a user by their ID.
+   */
+  async findUserById(id: string): Promise<User> {
     const user = await this.userModel.findById(id);
     if (!user) {
-      throw new NotFoundException('user is not found');
+      throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async findOne(randomToken: string) {
-    const user = await this.userModel.findOne({
-      randomToken: randomToken,
-    });
+  /**
+   * Finds a user by a random token.
+   */
+  async findUserByToken(randomToken: string): Promise<User> {
+    const user = await this.userModel.findOne({ randomToken });
     if (!user) {
-      throw new NotFoundException('user is not found');
+      throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async getByEmail(email: string) {
+  /**
+   * Finds a user by email.
+   */
+  async findUserByEmail(email: string): Promise<User> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      throw new NotFoundException('user is not found');
+      throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async approvedUserAsTalent(userId: string) {
-    return await this.userModel.findOneAndUpdate(
+  /**
+   * Approves a user as a talent.
+   */
+  async approveUserAsTalent(userId: string) {
+    return this.userModel.findOneAndUpdate(
       { _id: userId },
       { isTalent: true },
       { new: true },
     );
   }
 
-  async suspendUser(userId: string) {
-    return await this.userModel.findOneAndUpdate(
+  /**
+   * Suspends a user.
+   */
+  async suspendUserAccount(userId: string) {
+    return this.userModel.findOneAndUpdate(
       { _id: userId },
       { isSuspended: true },
       { new: true },
     );
   }
 
-  async unSuspendUser(userId: string) {
-    return await this.userModel.findOneAndUpdate(
+  /**
+   * Removes suspension from a user.
+   */
+  async unsuspendUserAccount(userId: string) {
+    return this.userModel.findOneAndUpdate(
       { _id: userId },
       { isSuspended: false },
       { new: true },
     );
   }
-  async deleteUser(payload: string) {
-    const user = await this.userModel.findOneAndDelete(
-      { userName: payload },
-      { new: true },
-    );
+
+  /**
+   * Deletes a user by their username.
+   */
+  async deleteUserByUsername(username: string) {
+    const user = await this.userModel.findOneAndDelete({ userName: username });
     if (!user) {
-      throw new NotFoundException(
-        `user with username ${payload} doesn't exist`,
-      );
+      throw new NotFoundException(`User with username ${username} doesn't exist`);
     }
-    return 'deleted';
+    return 'User deleted successfully';
   }
 
-  async token(payload: any) {
-    payload = {
-      _id: payload._id,
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      email: payload.email,
+  /**
+   * Generates authentication tokens (access and refresh tokens) for a user.
+   */
+  async generateAuthTokens(user: User) {
+    const payload = {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
     };
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwt.signAsync(payload, {
+      this.jwtService.signAsync(payload, {
         secret: ENVIRONMENT.JWT.JWT_SECRET,
         expiresIn: ENVIRONMENT.JWT.EXPIRATION_TIME,
       }),
-      this.jwt.signAsync(payload, {
+      this.jwtService.signAsync(payload, {
         secret: ENVIRONMENT.JWT.JWT_REFRESH_SECRET,
         expiresIn: ENVIRONMENT.JWT.JWT_REFRESH_EXP_TIME,
       }),
     ]);
-    return {
-      accessToken,
-      refreshToken,
-    };
+
+    return { accessToken, refreshToken };
   }
 }

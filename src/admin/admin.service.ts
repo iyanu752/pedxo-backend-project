@@ -26,8 +26,8 @@ export class AdminService {
   }
 
   async suspendUser(id: string) {
-    await this.userService.getById(id);
-    const userSuspended = await this.userService.suspendUser(id);
+    await this.userService.findUserById(id);
+    const userSuspended = await this.userService.suspendUserAccount(id);
     if (userSuspended.isTalent === true) {
       const userId = userSuspended._id;
       await this.suspendTalent(userId);
@@ -40,8 +40,8 @@ export class AdminService {
   }
 
   async unSuspendUser(id: string) {
-    await this.userService.getById(id);
-    const unSuspendedUser = await this.userService.unSuspendUser(id);
+    await this.userService.findUserById(id);
+    const unSuspendedUser = await this.userService.unsuspendUserAccount(id);
     if (unSuspendedUser.isTalent === true) {
       const userId = unSuspendedUser._id;
       await this.unSuspendTalent(userId);

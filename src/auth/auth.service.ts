@@ -21,6 +21,7 @@ import { OtpType } from 'src/otp/enum/opt.type.enum';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
 import { User } from 'src/user/schema/user.schema';
 import { generateRandomTokenForLoggedIn } from 'src/common/constant/generate.string';
+import { user } from 'src/user/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -33,23 +34,22 @@ export class AuthService {
   //sign up account endpoint
   async create(body: CreateUserDTO) {
     const { email } = body;
-
-    const userExist = await this.userService.getByEmailOrUserName(email);
+    const userExist = await this.userService.checkIfUserExists(email);
 
     if (userExist) {
       if (userExist.email === email) {
-        throw new UnprocessableEntityException('email already exist');
+        throw new UnprocessableEntityException('Email already exists');
       }
     }
 
-    return await this.userService.create(body);
+    return await this.userService.registerUser(body);
   }
 
   //Log in endpoint
 
   async login(body: LoginUserDTO) {
     const { email, password } = body;
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
     if (!user) {
       throw new NotFoundException('user not found');
     }
@@ -82,7 +82,7 @@ export class AuthService {
   async verifyEmail(payload: VerifyEmailDto) {
     const { email, code } = payload;
 
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
 
     await this.otpService.verifyOTP({
       email: email,
@@ -104,7 +104,7 @@ export class AuthService {
   async forgotPassword(payload: ForgetPasswordDto) {
     const { email } = payload;
 
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
 
     await this.otpService.sendOtp({
       email: email,
@@ -130,7 +130,7 @@ export class AuthService {
   async resetPassword(payload: ResetPasswordDto) {
     const { email, password } = payload;
 
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
 
     const hashedPassword = await HashData(password);
     user.password = hashedPassword;
@@ -142,7 +142,7 @@ export class AuthService {
   async requestOtp(payload: RequestOtpDto) {
     const { email, type } = payload;
 
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.findUserByEmail(email);
 
     const otp = await this.otpService.sendOtp({
       email: user.email,
@@ -177,7 +177,7 @@ export class AuthService {
 
   async refreshToken(randomToken: string) {
     try {
-      const user = await this.userService.findOne(randomToken);
+      const user = await this.userService.findUserByToken(randomToken);
 
       if (!user || !user.refreshToken) {
         throw new BadRequestException('Invalid request');
