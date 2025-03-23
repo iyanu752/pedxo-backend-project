@@ -17,7 +17,6 @@ export class JobDetailsDto {
   @IsNotEmpty()
   startDate: string;
 
-  @IsDateString()
   @IsOptional()
   endDate?: string;
 
