@@ -48,14 +48,17 @@ export class ContractController {
         data,
       };
     } catch (error) {
+      const statusCode = error?.getStatus?.() || 500; // Extract status code if available, otherwise default to 500
       return {
         path,
         status: 'failure',
+        statusCode,
         data: null,
         error: error.message,
       };
     }
   }
+  
 
   @UseGuards(JWTAuthGuard)
   @Post('personal-info')
