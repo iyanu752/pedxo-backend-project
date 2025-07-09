@@ -10,5 +10,6 @@ import { Hire, HireSchema } from './schemas/hire.schema';
   ],
   controllers: [HireController],
   providers: [HireService],
+  exports: [HireService],
 })
 export class HireModule {}

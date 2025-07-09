@@ -1,5 +1,6 @@
-import { Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { assignTalaentDto } from './dto/assignTalent.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -29,5 +30,10 @@ export class AdminController {
   @Post('unsuspend-talent/:id')
   async UnsuspendTalent(@Param('id') id: string) {
     return await this.adminService.unSuspendTalent(id);
+  }
+
+  @Patch('asign-tallet')
+  async asignTallet(@Body() payload: assignTalaentDto) {
+    return this.adminService.asignTallet(payload.talentIds, payload.hierId);
   }
 }

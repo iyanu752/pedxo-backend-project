@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import { BuildSomePart, WantTalentAs, WorkStartDate } from '../enum/hire.enum';
@@ -49,15 +50,20 @@ export class HireDTO {
   @IsString()
   yourCurrentJob: string;
 
-  @IsNumber()
+  // @IsNumber()
   @IsCurrency()
   minimumToPayToTalent: string;
+  @IsOptional()
   @IsString()
   website: string;
+  @IsOptional()
   @IsString()
   githubLink: string;
+
+  @IsOptional()
   @IsString()
   linkedIn: string;
+  @IsOptional()
   @IsString()
   twitterLink: string;
 }

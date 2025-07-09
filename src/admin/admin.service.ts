@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { HireService } from 'src/hire/hire.service';
 import { TalentService } from 'src/talent/talent.service';
 import { User } from 'src/user/schema/user.schema';
 import { UserService } from 'src/user/user.service';
@@ -14,6 +15,7 @@ export class AdminService {
   constructor(
     private userService: UserService,
     private talentService: TalentService,
+    private hierServic: HireService,
   ) {}
 
   async approvedTalent(id: string): Promise<any> {
@@ -51,5 +53,9 @@ export class AdminService {
   async unSuspendTalent(id: string) {
     const talent = await this.talentService.getById(id);
     return await this.talentService.unSuspendTalent(id);
+  }
+
+  async asignTallet(talentIds: string[], hierId: string) {
+    return await this.hierServic.assignTalaent(talentIds, hierId);
   }
 }
