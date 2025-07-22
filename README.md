@@ -25,7 +25,7 @@ Onboard teleoperators for your code agents on-demand and pay-as-you-go. This can
 
 Pedxo only charge you for success based and outcome.
 
-If you're interested in exploring pedxo.com further or need assistance in determining whether it's suitable for your code agent needs, feel free to ask!
+If you're interested in exploring pedxo.com further or need assistance in determining whether it's suitable for your code agent. Feel free to ask!
 
 
 About The Project: We're building a tool to help clients onboard human developers and pay them for pieces of work done.
