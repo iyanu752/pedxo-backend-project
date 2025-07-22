@@ -9,7 +9,7 @@ import {
   BadRequestException,
   UseGuards,
   Req,
-  InternalServerErrorException,
+  // InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ContractService } from './contract.service';
@@ -17,26 +17,30 @@ import { PersonalInfoDto } from './dto/personal-info.dto';
 import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
 import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
-import { S3Service } from '../s3service/s3service.service';
+import { CloudinaryService } from '../s3service/s3service.service';
+import { ApiConsumes } from '@nestjs/swagger';
 
-const fileFilter = (req, file, callback) => {
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
-  if (!allowedTypes.includes(file.mimetype)) {
-    return callback(new BadRequestException('Only PNG, JPEG, and SVG files are allowed'), false);
-  }
-  callback(null, true);
-};
+// const fileFilter = (req, file, callback) => {
+//   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+//   if (!allowedTypes.includes(file.mimetype)) {
+//     return callback(
+//       new BadRequestException('Only PNG, JPEG, and SVG files are allowed'),
+//       false,
+//     );
+//   }
+//   callback(null, true);
+// };
 
-const uploadOptions = {
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter,
-};
+// const uploadOptions = {
+//   limits: { fileSize: 2 * 1024 * 1024 },
+//   fileFilter,
+// };
 
 @Controller('contracts')
 export class ContractController {
   constructor(
     private readonly contractService: ContractService,
-    private readonly s3service: S3Service,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   private async handleRequest<T>(operation: () => Promise<T>, path: string) {
@@ -58,45 +62,80 @@ export class ContractController {
       };
     }
   }
-  
 
   @UseGuards(JWTAuthGuard)
   @Post('personal-info')
   createOrUpdatePersonalInfo(@Body() dto: PersonalInfoDto) {
-    return this.handleRequest(() => this.contractService.createOrUpdatePersonalInfo(dto), 'contracts/personal-info');
+    return this.handleRequest(
+      () => this.contractService.createOrUpdatePersonalInfo(dto),
+      'contracts/personal-info',
+    );
   }
 
   @UseGuards(JWTAuthGuard)
   @Patch('job-details')
   updateJobDetails(@Req() req, @Body() dto: JobDetailsDto) {
-    return this.handleRequest(() => this.contractService.updateJobDetails(req.user.email, dto), 'contracts/job-details');
+    return this.handleRequest(
+      () => this.contractService.updateJobDetails(req.user.email, dto),
+      'contracts/job-details',
+    );
   }
 
   @UseGuards(JWTAuthGuard)
   @Patch('compensation')
   updateCompensation(@Req() req, @Body() dto: CompensationDto) {
-    return this.handleRequest(() => this.contractService.updateCompensation(req.user.email, dto), 'contracts/compensation');
+    return this.handleRequest(
+      () => this.contractService.updateCompensation(req.user.email, dto),
+      'contracts/compensation',
+    );
   }
 
   @UseGuards(JWTAuthGuard)
   @Post('signature')
-  @UseInterceptors(FileInterceptor('signature', uploadOptions))
-  async uploadSignature(@UploadedFile() file: Express.Multer.File, @Req() req) {
-    if (!file) {
-      throw new BadRequestException('File is required');
+  @UseInterceptors(FileInterceptor('signature')) // handles multiple file uploads
+  @ApiConsumes('multipart/form-data')
+  async uploadSignature(
+    @UploadedFile() signature: Express.Multer.File,
+    @Req() req,
+  ) {
+    try {
+      if (!signature) {
+        throw new BadRequestException('File is required');
+      }
+
+      const uploadedUrl = await this.cloudinaryService.uploadFile(signature);
+
+      return this.handleRequest(
+        () => this.contractService.submitSignature(req.user.email, uploadedUrl),
+        'contracts/signature',
+      );
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new BadRequestException({
+        error: true,
+        message: 'Something went wrong during signature upload',
+        data: null,
+      });
     }
-    return this.handleRequest(() => this.contractService.submitSignature(req.user.email, file), 'contracts/signature');
   }
 
   @UseGuards(JWTAuthGuard)
   @Patch('finalize')
   finalizeContract(@Req() req) {
-    return this.handleRequest(() => this.contractService.finalizeContract(req.user.email), 'contracts/finalize');
+    return this.handleRequest(
+      () => this.contractService.finalizeContract(req.user.email),
+      'contracts/finalize',
+    );
   }
 
   @UseGuards(JWTAuthGuard)
   @Get('')
   getContract(@Req() req) {
-    return this.handleRequest(() => this.contractService.getContract(req.user.email), 'contracts');
+    return this.handleRequest(
+      () => this.contractService.getContract(req.user.email),
+      'contracts',
+    );
   }
 }

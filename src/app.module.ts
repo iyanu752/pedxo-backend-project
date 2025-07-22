@@ -1,4 +1,4 @@
-import { Module} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,9 +10,9 @@ import { OtpModule } from './otp/otp.module';
 import { OutSourceModule } from './outsource/outsource.module';
 import { BookDemoModule } from './bookdemo/module/demo.module';
 import { ContractModule } from './contracts/contract.module';
-import { S3Service } from './s3service/s3service.service';
+import { CloudinaryService } from './s3service/s3service.service';
 import { S3serviceModule } from './s3service/s3service.module';
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv';
 dotenv.config();
 @Module({
   imports: [
@@ -37,7 +37,6 @@ dotenv.config();
     S3serviceModule,
   ],
   controllers: [],
-  providers: [S3Service],
+  providers: [CloudinaryService],
 })
-export class AppModule {
-}
+export class AppModule {}

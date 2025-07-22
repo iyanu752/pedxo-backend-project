@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Contract, ContractDocument } from './schemas/contract.schema';
 import { PersonalInfoDto } from './dto/personal-info.dto';
 import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
-import { S3Service } from 'src/s3service/s3service.service';
 import { ContractEmailDto } from './dto/contract.email.dto';
 import { EmailService } from '../common/email.service';
 
@@ -13,11 +16,12 @@ import { EmailService } from '../common/email.service';
 export class ContractService {
   constructor(
     @InjectModel(Contract.name) private contractModel: Model<ContractDocument>,
-    private s3service: S3Service,
     private emailservice: EmailService,
   ) {}
 
-  private async handleDatabaseOperation<T>(operation: () => Promise<T>): Promise<T> {
+  private async handleDatabaseOperation<T>(
+    operation: () => Promise<T>,
+  ): Promise<T> {
     try {
       const result = await operation();
       if (!result) throw new NotFoundException('Contract not found');
@@ -50,9 +54,8 @@ export class ContractService {
     return this.updateContract(email, dto, 'review');
   }
 
-  async submitSignature(email: string, file: Express.Multer.File) {
+  async submitSignature(email: string, signatureUrl: string) {
     return this.handleDatabaseOperation(async () => {
-      const signatureUrl = await this.s3service.uploadSignature(file);
       return this.contractModel.findOneAndUpdate(
         { email },
         { $set: { signature: signatureUrl, progress: 'signed' } },
@@ -85,6 +88,8 @@ export class ContractService {
   }
 
   async getContract(email: string) {
-    return this.handleDatabaseOperation(() => this.contractModel.findOne({ email }));
+    return this.handleDatabaseOperation(() =>
+      this.contractModel.findOne({ email }),
+    );
   }
 }
