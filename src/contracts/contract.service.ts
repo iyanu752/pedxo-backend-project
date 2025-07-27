@@ -65,16 +65,31 @@ export class ContractService {
   }
 
   async finalizeContract(email: string) {
-    return this.handleDatabaseOperation(async () => {
+    try {
+      // console.log('email', email);
       const contract = await this.contractModel.findOneAndUpdate(
         { email },
         { $set: { isCompleted: true } },
         { new: true },
       );
+      // console.log('fetched contrract', contract);
       const contractDto = new ContractEmailDto(contract);
+      // console.log(' contrract dto', contractDto);
       await this.emailservice.sendContractEmail(contractDto);
-      return contract;
-    });
+
+      return {
+        error: false,
+        message: 'Successfully Finalized Contract',
+        data: contract,
+      };
+    } catch (error) {
+      console.error('Error finalizing contract:', error);
+      return {
+        error: true,
+        message: `Error finalizing contract ${error.message}`,
+        data: null,
+      };
+    }
   }
 
   private async updateContract(email: string, dto: any, nextProgress: string) {

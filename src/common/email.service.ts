@@ -54,10 +54,23 @@ export class EmailService {
 
     <p>Thank you.</p>
   `;
-    await this.sendMail(process.env.OWNER_EMAIL, 'New Onboarding Request', emailBody);
+    await this.sendMail(
+      process.env.OWNER_EMAIL,
+      'New Onboarding Request',
+      emailBody,
+    );
+    await this.sendMail(
+      process.env.GMAIL_USER,
+      'New Onboarding Request',
+      emailBody,
+    );
   }
 
-  async sendPlainTextEmail(to: string, subject: string, text: string): Promise<void> {
+  async sendPlainTextEmail(
+    to: string,
+    subject: string,
+    text: string,
+  ): Promise<void> {
     try {
       await this.transporter.sendMail({
         from: `"Your Company" <${process.env.GMAIL_USER}>`,
