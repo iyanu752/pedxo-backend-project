@@ -56,6 +56,6 @@ export class AdminService {
   }
 
   async asignTallet(talentIds: string[], hierId: string) {
-    return await this.hierServic.assignTalaent(talentIds, hierId);
+    return await this.hierServic.assignTalent(talentIds, hierId);
   }
 }

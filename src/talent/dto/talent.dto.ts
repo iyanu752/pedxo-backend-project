@@ -5,7 +5,9 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  isEnum,
+  IsEmail,
+  IsDate,
+  // isEnum,
 } from 'class-validator';
 import {
   ExperiencedLevel,
@@ -14,7 +16,8 @@ import {
   WorkPattern,
 } from '../enum/talent.enum';
 import { PartialType } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Type } from 'class-transformer';
+// import { Exclude } from 'class-transformer';
 
 export class CreateTalentDto {
   @IsOptional()
@@ -75,5 +78,70 @@ export class CreateTalentDto {
   @IsString()
   image?: object;
 }
+
+export class CreateTalentDetailsDto {
+  @IsNotEmpty()
+  @IsString()
+  firstName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  roleTitle: string;
+
+  @IsNotEmpty()
+  @IsString()
+  country: string;
+
+  @IsNotEmpty()
+  @IsString()
+  state: string;
+
+  @IsOptional()
+  @IsString()
+  city: string;
+
+  @IsNotEmpty()
+  @IsString()
+  gender: string;
+
+  @IsNotEmpty()
+  @IsString()
+  bankName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  accountNumber: string;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  dateOfBirth: Date;
+
+  @IsNotEmpty()
+  @IsEnum(ExperiencedLevel)
+  experiencedLevel: string;
+
+  @IsOptional()
+  @IsString()
+  githubAccount: string;
+
+  @IsNotEmpty()
+  @IsString()
+  portfolioLink: string;
+
+  @IsNotEmpty()
+  @IsString()
+  whatsappNumber: string;
+}
+
+export class UpdateDetailsDto extends PartialType(CreateTalentDetailsDto) {}
 
 export class UpdateDto extends PartialType(CreateTalentDto) {}

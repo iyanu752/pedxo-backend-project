@@ -6,12 +6,17 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { TalentService } from './talent.service';
 import { CurrentUser } from 'src/common/decorator/current.logged.user';
 import { AuthGuard } from 'src/auth/customGuard/guard.custom';
 import { Talent } from './schemas/talent.schema';
-import { CreateTalentDto, UpdateDto } from './dto/talent.dto';
+import {
+  CreateTalentDto,
+  UpdateDto,
+  CreateTalentDetailsDto,
+} from './dto/talent.dto';
 import { User } from 'src/user/schema/user.schema';
 
 @Controller('talent')
@@ -41,5 +46,35 @@ export class TalentController {
   @Patch()
   async update(@Body() payload: UpdateDto, @CurrentUser() user: User) {
     return await this.talentService.update(user, payload);
+  }
+
+  // === Talent Details Routes ===
+
+  @Post('details')
+  async createTalentDetails(@Body() data: CreateTalentDetailsDto) {
+    return await this.talentService.createTalentDetails(data);
+  }
+
+  @Get('details/all')
+  async findAllTalentDetails() {
+    return await this.talentService.findAllTalentDetails();
+  }
+
+  @Get('details/:id')
+  async findTalentDetailsById(@Param('id') id: string) {
+    return await this.talentService.findTalentDetailsById(id);
+  }
+
+  @Patch('details/:id')
+  async updateTalentDetails(
+    @Param('id') id: string,
+    @Body() data: CreateTalentDetailsDto,
+  ) {
+    return await this.talentService.updateTalentDetails(id, data);
+  }
+
+  @Delete('details/:id')
+  async deleteTalentDetails(@Param('id') id: string) {
+    return await this.talentService.deleteTalentDetails(id);
   }
 }
