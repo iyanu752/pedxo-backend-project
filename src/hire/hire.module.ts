@@ -8,7 +8,6 @@ import {
   TalentDetails,
   TalentDetailsSchema,
 } from 'src/talent/schemas/talent-details.schema';
-
 import { ContractService } from 'src/contracts/contract.service';
 import {
   Contract,
