@@ -127,7 +127,7 @@ export class CreateTalentDetailsDto {
 
   @IsNotEmpty()
   @IsEnum(ExperiencedLevel)
-  experiencedLevel: string;
+  experienceLevel: string;
 
   @IsOptional()
   @IsString()
