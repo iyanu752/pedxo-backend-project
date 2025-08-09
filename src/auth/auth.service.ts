@@ -22,6 +22,8 @@ import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
 import { User } from 'src/user/schema/user.schema';
 import { generateRandomTokenForLoggedIn } from 'src/common/constant/generate.string';
 import { user } from 'src/user/dto/user.dto';
+import { LoginAdminDto } from 'src/admin/dto/admin.dto';
+import { AdminService } from 'src/admin/admin.service';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +31,7 @@ export class AuthService {
     private userService: UserService,
     private jwt: JwtService,
     private otpService: OtpService,
+    private adminService: AdminService,
   ) {}
 
   //sign up account endpoint
@@ -73,8 +76,8 @@ export class AuthService {
     user.randomToken = randomToken;
     await user.save();
     return {
-      name:"khaldi",
-      result:user,
+      name: 'khaldi',
+      result: user,
       accessToken,
     };
   }
@@ -188,5 +191,44 @@ export class AuthService {
     } catch (e) {
       throw new BadRequestException('Invalid refresh token');
     }
+  }
+
+  // Inside AuthService
+  async loginAdmin(body: LoginAdminDto) {
+    const { email, password } = body;
+    const admin = await this.adminService.findByEmail(email);
+
+    if (!admin) {
+      return { error: true, message: 'Admin not found', data: null };
+    }
+
+    if (!(await comparedHashed(password, admin.password))) {
+      return { error: true, message: 'Invalid credentials', data: null };
+    }
+
+    if (!admin.isActive) {
+      return { error: true, message: 'Admin account is inactive', data: null };
+    }
+
+    const token = await this.jwt.signAsync(
+      {
+        adminId: admin._id,
+        email: admin.email,
+        role: admin.role,
+      },
+      {
+        secret: ENVIRONMENT.JWT.JWT_SECRET,
+        expiresIn: ENVIRONMENT.JWT.EXPIRATION_TIME,
+      },
+    );
+
+    return {
+      error: false,
+      message: 'Login successful',
+      data: {
+        admin,
+        token,
+      },
+    };
   }
 }

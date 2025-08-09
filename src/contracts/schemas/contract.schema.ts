@@ -51,7 +51,12 @@ export class Contract {
   signature?: string; // Base64 or URL to saved signature image
 
   @Prop({ default: 'personal-info' }) // Tracks progress
-  progress: 'personal-info' | 'job-details' | 'compensation' | 'review' | 'signed';
+  progress:
+    | 'personal-info'
+    | 'job-details'
+    | 'compensation'
+    | 'review'
+    | 'signed';
 
   @Prop({ default: false }) // Marks contract as completed
   isCompleted: boolean;

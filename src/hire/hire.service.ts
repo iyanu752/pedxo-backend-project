@@ -9,15 +9,61 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Hire } from './schemas/hire.schema';
 import { Model } from 'mongoose';
 import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
+import { ContractService } from 'src/contracts/contract.service';
+
 
 @Injectable()
 export class HireService {
   constructor(
     @InjectModel(Hire.name) private hireModel: Model<Hire>,
     private readonly talentRepo: TalentDetailsRepository,
+    private readonly contractService: ContractService,
   ) {}
+
+  private async _formatAssignedTalents(hire: Hire) {
+    const contract = await this.contractService.getContractById(
+      hire.contractId,
+    );
+
+    const assignedTalents = await Promise.all(
+      (hire.talentAssignedId || []).map(async (talentId) => {
+        const talent = await this.talentRepo.findByTalentId(talentId);
+        if (!talent) return null;
+
+        return {
+          fullName: `${talent.firstName} ${talent.lastName}`,
+          email: talent.email,
+          country: talent.country,
+          githubAccount: talent.githubAccount,
+          paymentRate: contract?.paymentRate,
+          paymentFrequency: contract?.paymentFrequency,
+          seniorityLevel: contract?.seniorityLevel,
+          roleTitle: contract?.roleTitle,
+        };
+      }),
+    );
+
+    return {
+      error: false,
+      message: 'Assigned talents fetched successfully',
+      data: assignedTalents.filter(Boolean),
+    };
+  }
+
   async talent(payload: HireDTO, user: User) {
     const { _id } = user;
+
+    const contract = await this.contractService.getContractById(
+      payload.contractId,
+    );
+
+    if (!contract) {
+      return {
+        error: true,
+        message: 'Invalid Contract ID',
+        data: null,
+      };
+    }
     if (!user || user.isSuspended === true) {
       throw new ForbiddenException('you can proceed with request');
     }
@@ -64,6 +110,107 @@ export class HireService {
       return {
         error: true,
         message: e.message,
+        data: null,
+      };
+    }
+  }
+
+  async getAssignedTalentsByUser(userId: string) {
+    try {
+      const hires = await this.hireModel.find({ userId });
+
+      // console.log('hires', hires);
+      if (!hires) {
+        return {
+          error: true,
+          message: 'Hire with this ID does not exist',
+          data: null,
+        };
+      }
+
+      const result = [];
+
+      for (const hire of hires) {
+        const contract = await this.contractService.getContractById(
+          hire.contractId,
+        );
+
+        const enrichedTalents = await Promise.all(
+          (hire.talentAssignedId || []).map(async (talentId) => {
+            const talent = await this.talentRepo.findByTalentId(talentId);
+            if (!talent) return null;
+
+            return {
+              fullName: `${talent.firstName} ${talent.lastName}`,
+              email: talent.email,
+              country: talent.country,
+              githubAccount: talent.githubAccount,
+              paymentRate: contract?.paymentRate,
+              paymentFrequency: contract?.paymentFrequency,
+              seniorityLevel: contract?.seniorityLevel,
+              roleTitle: contract?.roleTitle,
+            };
+          }),
+        );
+
+        result.push({
+          hireId: hire._id,
+          contractId: hire.contractId,
+          assignedTalents: enrichedTalents.filter(Boolean),
+        });
+      }
+
+      return {
+        error: false,
+        message: 'Assigned talents fetched successfully',
+        data: result,
+      };
+    } catch (error) {
+      return {
+        error: true,
+        message: `Error getting assigned talents by user: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getAssignedTalentByHireId(hireId: string) {
+    try {
+      const hire = await this.hireModel.findById(hireId);
+      if (!hire) {
+        return {
+          error: true,
+          message: 'No hire found with this ID',
+          data: null,
+        };
+      }
+
+      return this._formatAssignedTalents(hire);
+    } catch (error) {
+      return {
+        error: true,
+        message: `Error getting assigned talents by hireId: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getAssignedTalentByContractId(contractId: string) {
+    try {
+      const hire = await this.hireModel.findOne({ contractId });
+      if (!hire) {
+        return {
+          error: true,
+          message: 'No hire found with this contract ID',
+          data: null,
+        };
+      }
+
+      return this._formatAssignedTalents(hire);
+    } catch (error) {
+      return {
+        error: true,
+        message: `Error getting assigned talents by contractId: ${error.message}`,
         data: null,
       };
     }

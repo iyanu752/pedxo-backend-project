@@ -1,12 +1,35 @@
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { assignTalaentDto } from './dto/assignTalent.dto';
+import { CreateAdminDto, LoginAdminDto } from './dto/admin.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private authService: AuthService,
+  ) {}
 
-  //@UseGuards(AuthGuard)//i will use this to make only admin to only approve talent
+  @Post('signup')
+  signup(@Body() dto: CreateAdminDto) {
+    return this.adminService.create(dto);
+  }
+
+  @Post('login')
+  login(@Body() dto: LoginAdminDto) {
+    return this.authService.loginAdmin(dto);
+  }
+
+  @UseGuards(AdminAuthGuard)
   @Post('approve-talent/:id')
   async Approved(@Param('id') id: string) {
     return await this.adminService.approvedTalent(id);
@@ -33,6 +56,7 @@ export class AdminController {
   }
 
   @Patch('asign-tallet')
+  @UseGuards(AdminAuthGuard)
   async asignTallet(@Body() payload: assignTalaentDto) {
     return this.adminService.asignTallet(payload.talentIds, payload.hierId);
   }

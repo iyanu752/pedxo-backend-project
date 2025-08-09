@@ -3,13 +3,17 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
+  // IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { BuildSomePart, WantTalentAs, WorkStartDate } from '../enum/hire.enum';
 
 export class HireDTO {
+  @IsNotEmpty()
+  @IsString()
+  contractId: string;
+
   @IsNotEmpty()
   @IsString()
   name: string;

@@ -7,6 +7,9 @@ export class Hire extends Document {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   userId: string;
 
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
+  contractId: string;
+
   @Prop({ type: String, required: true })
   name: string;
 
