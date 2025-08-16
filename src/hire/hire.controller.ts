@@ -30,4 +30,9 @@ export class HireController {
   getAssignedTalentByContract(@Param('contractId') contractId: string) {
     return this.hireService.getAssignedTalentByContractId(contractId);
   }
+
+  @Get('get-all-hires')
+  getAllHires() {
+    return this.hireService.getAllHires();
+  }
 }

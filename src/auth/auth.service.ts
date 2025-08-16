@@ -214,7 +214,7 @@ export class AuthService {
       {
         adminId: admin._id,
         email: admin.email,
-        role: admin.role,
+        role: 'admin',
       },
       {
         secret: ENVIRONMENT.JWT.JWT_SECRET,

@@ -214,4 +214,21 @@ export class HireService {
       };
     }
   }
+
+  async getAllHires() {
+    try {
+      const hires = await this.hireModel.find().exec();
+      return {
+        error: false,
+        message: 'All hires fetched successfully',
+        data: hires,
+      };
+    } catch (error) {
+      return {
+        error: true,
+        message: `Error getting all hires: ${error.message}`,
+        data: null,
+      };
+    }
+  }
 }
