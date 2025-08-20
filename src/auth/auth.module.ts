@@ -30,6 +30,8 @@ import {
 } from 'src/contracts/schemas/contract.schema';
 import { EmailService } from 'src/common/email.service';
 import { Admin, AdminSchema } from 'src/admin/schemas/admin.schema';
+import { GoogleStrategy } from './strategy/google.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 //module decorator
 @Module({
@@ -51,6 +53,7 @@ import { Admin, AdminSchema } from 'src/admin/schemas/admin.schema';
     UserModule,
     OtpModule,
     AdminModule,
+    PassportModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -65,6 +68,8 @@ import { Admin, AdminSchema } from 'src/admin/schemas/admin.schema';
     RefreshTokenStrategy,
     JWTAuthGuard,
     JwtStrategy,
+    GoogleStrategy,
   ],
+  exports: [PassportModule, JwtModule],
 })
 export class AuthModule {}

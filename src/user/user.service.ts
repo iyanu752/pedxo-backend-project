@@ -21,7 +21,7 @@ export class UserService {
   /**
    * Registers a new user, hashes their password, and sends an OTP for email verification.
    */
-  async registerUser(payload: CreateUserDTO) {
+  async registerUser(payload: Partial<User>) {
     const { password } = payload;
 
     const hashedPassword = await HashData(password);
@@ -57,10 +57,10 @@ export class UserService {
    */
   async checkIfUserExists(email?: string): Promise<User | null> {
     if (!email) {
-      throw new Error("Either email or username must be provided");
+      throw new Error('Either email or username must be provided');
     }
 
-    return this.userModel.findOne({email}).exec();
+    return this.userModel.findOne({ email }).exec();
   }
 
   /**
@@ -159,7 +159,9 @@ export class UserService {
   async deleteUserByUsername(username: string) {
     const user = await this.userModel.findOneAndDelete({ userName: username });
     if (!user) {
-      throw new NotFoundException(`User with username ${username} doesn't exist`);
+      throw new NotFoundException(
+        `User with username ${username} doesn't exist`,
+      );
     }
     return 'User deleted successfully';
   }
@@ -187,5 +189,15 @@ export class UserService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  async registerGoogleUser(dto: Partial<CreateUserDTO>) {
+    // google signup -> no password
+    const user = new this.userModel({
+      ...dto,
+      provider: 'google',
+      password: null, // explicit null
+    });
+    return user.save();
   }
 }

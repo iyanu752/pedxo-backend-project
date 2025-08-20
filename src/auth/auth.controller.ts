@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from '../user/dto/create.user.dto';
@@ -22,6 +23,7 @@ import { LoginResponse, UserDto } from 'src/user/dto/user.dto';
 import { AuthGuard } from './customGuard/guard.custom';
 import { CurrentUser } from 'src/common/decorator/current.logged.user';
 import { User } from 'src/user/schema/user.schema';
+import { AuthGuard as Guard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -68,5 +70,20 @@ export class AuthController {
   @Get('refresh-token/:randomToken')
   async refreshToken(@Param('randomToken') randomToken: string) {
     return await this.authService.refreshToken(randomToken);
+  }
+
+  @Get('google')
+  @UseGuards(Guard('google'))
+  async googleAuth(@Req() req) {}
+
+  @Get('google/redirect')
+  @UseGuards(Guard('google'))
+  async googleAuthRedirect(@Req() req) {
+    const user = await this.authService.googleSignup(req.user);
+    return {
+      status: 'successful',
+      message: 'user account created successfully via google',
+      data: user,
+    };
   }
 }
