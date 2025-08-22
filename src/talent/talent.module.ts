@@ -9,18 +9,21 @@ import {
   TalentDetailsSchema,
 } from './schemas/talent-details.schema';
 import { TalentDetailsRepository } from './repository/talent-details.repository';
+import { TokenService } from './token.service';
+import { FormToken, FormTokenSchema } from './schemas/token.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Talent.name, schema: TalentSchema },
+      { name: FormToken.name, schema: FormTokenSchema },
       { name: TalentDetails.name, schema: TalentDetailsSchema },
     ]),
     UserModule,
   ],
 
   controllers: [TalentController],
-  providers: [TalentService, TalentDetailsRepository],
-  exports: [TalentService],
+  providers: [TalentService, TokenService, TalentDetailsRepository],
+  exports: [TalentService, TokenService],
 })
 export class TalentModule {}

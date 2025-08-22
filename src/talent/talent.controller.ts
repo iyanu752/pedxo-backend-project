@@ -18,6 +18,7 @@ import {
   CreateTalentDetailsDto,
 } from './dto/talent.dto';
 import { User } from 'src/user/schema/user.schema';
+import { TokenGuard } from 'src/auth/customGuard/token.guard';
 
 @Controller('talent')
 export class TalentController {
@@ -56,6 +57,7 @@ export class TalentController {
   }
 
   @Get('details/all')
+  @UseGuards(TokenGuard)
   async findAllTalentDetails() {
     return await this.talentService.findAllTalentDetails();
   }

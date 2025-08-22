@@ -11,12 +11,14 @@ import { assignTalaentDto } from './dto/assignTalent.dto';
 import { CreateAdminDto, LoginAdminDto } from './dto/admin.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
+import { TokenService } from 'src/talent/token.service';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private adminService: AdminService,
     private authService: AuthService,
+    private tokenService: TokenService,
   ) {}
 
   @Post('signup')
@@ -27,6 +29,14 @@ export class AdminController {
   @Post('login')
   login(@Body() dto: LoginAdminDto) {
     return this.authService.loginAdmin(dto);
+  }
+
+  // Admin generates token
+  @Post('generate-token')
+  @UseGuards(AdminAuthGuard)
+  async generateToken() {
+    const token = await this.tokenService.generateToken();
+    return { token, expiresIn: '20 minutes' };
   }
 
   @UseGuards(AdminAuthGuard)

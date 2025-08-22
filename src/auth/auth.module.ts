@@ -32,6 +32,8 @@ import { EmailService } from 'src/common/email.service';
 import { Admin, AdminSchema } from 'src/admin/schemas/admin.schema';
 import { GoogleStrategy } from './strategy/google.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { TokenService } from 'src/talent/token.service';
+import { FormToken, FormTokenSchema } from 'src/talent/schemas/token.schema';
 
 //module decorator
 @Module({
@@ -42,6 +44,7 @@ import { PassportModule } from '@nestjs/passport';
       { name: Hire.name, schema: HireSchema },
       { name: Contract.name, schema: ContractSchema },
       { name: Admin.name, schema: AdminSchema },
+      { name: FormToken.name, schema: FormTokenSchema },
     ]),
     {
       ...JwtModule.register({
@@ -61,6 +64,7 @@ import { PassportModule } from '@nestjs/passport';
     AuthGuard,
     TalentService,
     EmailService,
+    TokenService,
     HireService,
     ContractService,
     AdminService,

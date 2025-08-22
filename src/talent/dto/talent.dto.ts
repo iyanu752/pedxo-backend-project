@@ -140,6 +140,10 @@ export class CreateTalentDetailsDto {
   @IsNotEmpty()
   @IsString()
   whatsappNumber: string;
+
+  @IsNotEmpty()
+  @IsString()
+  token: string;
 }
 
 export class UpdateDetailsDto extends PartialType(CreateTalentDetailsDto) {}

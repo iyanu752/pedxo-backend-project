@@ -11,18 +11,27 @@ import { AuthService } from 'src/auth/auth.service';
 import { OtpService } from 'src/otp/service/otp.service';
 import { OTP, OtpSchema } from 'src/otp/schema/otp.schema';
 import { EmailService } from 'src/common/email.service';
+import { TokenService } from 'src/talent/token.service';
+import { FormToken, FormTokenSchema } from 'src/talent/schemas/token.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Admin.name, schema: AdminSchema },
       { name: OTP.name, schema: OtpSchema },
+      { name: FormToken.name, schema: FormTokenSchema },
     ]),
     UserModule,
     TalentModule,
     HireModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService, AuthService, EmailService, OtpService],
+  providers: [
+    AdminService,
+    AuthService,
+    TokenService,
+    EmailService,
+    OtpService,
+  ],
 })
 export class AdminModule {}
