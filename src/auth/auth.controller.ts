@@ -80,10 +80,7 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(Guard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
-    const user = await this.authService.googleSignup(req.user);
-    const token = await this.authService.token(user);
-    const accessToken = token.accessToken;
-
+    const { accessToken } = await this.authService.googleAuth(req.user);
     return res.redirect(
       `http://localhost:5173/auth/success?token=${accessToken}`,
     );
