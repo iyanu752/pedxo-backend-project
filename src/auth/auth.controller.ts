@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from '../user/dto/create.user.dto';
@@ -78,12 +79,13 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(Guard('google'))
-  async googleAuthRedirect(@Req() req) {
+  async googleAuthRedirect(@Req() req, @Res() res) {
     const user = await this.authService.googleSignup(req.user);
-    return {
-      status: 'successful',
-      message: 'user account created successfully via google',
-      data: user,
-    };
+    const token = await this.authService.token(user);
+    const accessToken = token.accessToken;
+
+    return res.redirect(
+      `http://localhost:5173/auth/success?token=${accessToken}`,
+    );
   }
 }
