@@ -9,6 +9,8 @@ import { OtpService } from 'src/otp/service/otp.service';
 import { OtpType } from 'src/otp/enum/opt.type.enum';
 import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
 import { JwtService } from '@nestjs/jwt';
+import { UserAccessTaskItem } from 'aws-sdk/clients/appfabric';
+import { AuthProvider } from './enum/auth-provider.enum';
 
 @Injectable()
 export class UserService {
@@ -191,13 +193,15 @@ export class UserService {
     return { accessToken, refreshToken };
   }
 
-  async registerGoogleUser(dto: Partial<CreateUserDTO>) {
-    // google signup -> no password
-    const user = new this.userModel({
+  async registerGoogleUser(dto: Partial<User>) {
+    const googleUser = await this.userModel.create({
       ...dto,
-      provider: 'google',
-      password: null, // explicit null
     });
-    return user.save();
+    const token = await this.generateAuthTokens(googleUser);
+    googleUser.accessToken = token.accessToken;
+    googleUser.refreshToken = token.refreshToken;
+    googleUser.provider = 'google' as AuthProvider;
+    await googleUser.save();
+    return { googleUser, accessToken: token.accessToken };
   }
 }

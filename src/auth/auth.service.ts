@@ -241,16 +241,19 @@ export class AuthService {
       throw new BadRequestException('Google account has no email');
     }
 
-    const user = await this.userService.checkIfUserExists(email);
+    let user = await this.userService.checkIfUserExists(email);
 
     if (!user) {
       const payload = {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
+        firstName,
+        lastName,
+        email,
         provider: 'google' as AuthProvider,
       };
-      const user = await this.userService.registerGoogleUser(payload);
+
+      const { googleUser: createdUser } =
+        await this.userService.registerGoogleUser(payload);
+      user = createdUser;
     }
 
     const token = await this.token(user);
