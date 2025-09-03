@@ -244,11 +244,12 @@ export class AuthService {
     let user = await this.userService.checkIfUserExists(email);
 
     if (!user) {
+      // Register new Google user
       const payload = {
         firstName,
         lastName,
         email,
-        provider: 'google' as AuthProvider,
+        provider: AuthProvider.GOOGLE,
       };
 
       const { googleUser: createdUser } =
@@ -256,9 +257,15 @@ export class AuthService {
       user = createdUser;
     }
 
-    const token = await this.token(user);
-    const accessToken = token.accessToken;
+    // Always refresh tokens when signing in
+    const tokens = await this.userService.generateAuthTokens(user);
+    user.refreshToken = tokens.refreshToken;
+    user.accessToken = tokens.accessToken;
+    await user.save();
 
-    return { user, accessToken };
+    return {
+      user,
+      accessToken: tokens.accessToken,
+    };
   }
 }
