@@ -258,11 +258,12 @@ export class AuthService {
     }
 
     // Always refresh tokens when signing in
+    const randomToken = await generateRandomTokenForLoggedIn();
     const tokens = await this.userService.generateAuthTokens(user);
     user.refreshToken = tokens.refreshToken;
     user.accessToken = tokens.accessToken;
+    user.randomToken = randomToken;
     await user.save();
-
     return {
       user,
       accessToken: tokens.accessToken,

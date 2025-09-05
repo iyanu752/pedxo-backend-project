@@ -24,6 +24,12 @@ export class UserDto {
 
   @Expose()
   accessToken: string;
+
+  @Expose()
+  randomToken: string;
+
+  @Expose()
+  refreshToken: string;
 }
 
 export class user {

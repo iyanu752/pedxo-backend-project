@@ -11,6 +11,7 @@ import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
 import { JwtService } from '@nestjs/jwt';
 import { UserAccessTaskItem } from 'aws-sdk/clients/appfabric';
 import { AuthProvider } from './enum/auth-provider.enum';
+import { generateRandomTokenForLoggedIn } from '../common/constant/generate.string';
 
 @Injectable()
 export class UserService {
@@ -198,9 +199,11 @@ export class UserService {
       ...dto,
     });
     const token = await this.generateAuthTokens(googleUser);
+    const randomToken = await generateRandomTokenForLoggedIn();
     googleUser.accessToken = token.accessToken;
     googleUser.refreshToken = token.refreshToken;
     googleUser.provider = 'google' as AuthProvider;
+    googleUser.randomToken = randomToken;
     await googleUser.save();
     return { googleUser, accessToken: token.accessToken };
   }
