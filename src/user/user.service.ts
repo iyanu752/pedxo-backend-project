@@ -207,4 +207,18 @@ export class UserService {
     await googleUser.save();
     return { googleUser, accessToken: token.accessToken };
   }
+
+  async registerGithubUser(dto: Partial<User>) {
+    const githubUser = await this.userModel.create({
+      ...dto,
+    });
+    const token = await this.generateAuthTokens(githubUser);
+    const randomToken = await generateRandomTokenForLoggedIn();
+    githubUser.accessToken = token.accessToken;
+    githubUser.refreshToken = token.refreshToken;
+    githubUser.provider = 'github' as AuthProvider;
+    githubUser.randomToken = randomToken;
+    await githubUser.save();
+    return { githubUser, accessToken: token.accessToken };
+  }
 }

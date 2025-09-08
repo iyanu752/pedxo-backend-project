@@ -269,4 +269,40 @@ export class AuthService {
       accessToken: tokens.accessToken,
     };
   }
+
+  async githubAuth(githubUser: googleAuth) {
+    const { email, firstName, lastName } = githubUser;
+
+    if (!email) {
+      throw new BadRequestException('Account has no email');
+    }
+
+    let user = await this.userService.checkIfUserExists(email);
+
+    if (!user) {
+      // Register user
+      const payload = {
+        firstName,
+        lastName,
+        email,
+        provider: AuthProvider.GITHUB,
+      };
+
+      const { githubUser: createdUser } =
+        await this.userService.registerGithubUser(payload);
+      user = createdUser;
+    }
+
+    // Always refresh tokens when signing in
+    const randomToken = await generateRandomTokenForLoggedIn();
+    const tokens = await this.userService.generateAuthTokens(user);
+    user.refreshToken = tokens.refreshToken;
+    user.accessToken = tokens.accessToken;
+    user.randomToken = randomToken;
+    await user.save();
+    return {
+      user,
+      accessToken: tokens.accessToken,
+    };
+  }
 }

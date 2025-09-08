@@ -34,6 +34,7 @@ import { GoogleStrategy } from './strategy/google.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { TokenService } from 'src/talent/token.service';
 import { FormToken, FormTokenSchema } from 'src/talent/schemas/token.schema';
+import {GithubStrategy} from './strategy/github.strategy'
 
 //module decorator
 @Module({
@@ -73,6 +74,7 @@ import { FormToken, FormTokenSchema } from 'src/talent/schemas/token.schema';
     JWTAuthGuard,
     JwtStrategy,
     GoogleStrategy,
+    GithubStrategy,
   ],
   exports: [PassportModule, JwtModule],
 })
