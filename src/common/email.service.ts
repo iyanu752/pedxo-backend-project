@@ -6,8 +6,8 @@ import { ContractEmailDto } from '../contracts/dto/contract.email.dto';
 export class EmailService {
   private transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASSWORD,
