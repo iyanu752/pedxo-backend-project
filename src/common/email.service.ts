@@ -5,12 +5,27 @@ import { ContractEmailDto } from '../contracts/dto/contract.email.dto';
 @Injectable()
 export class EmailService {
   private transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASSWORD,
     },
   });
+
+  constructor() {
+    this.verifyConnection();
+  }
+
+  private async verifyConnection() {
+    try {
+      await this.transporter.verify();
+      console.log('✅ SMTP server is ready to take messages');
+    } catch (err) {
+      console.error('❌ SMTP verify failed:', err);
+    }
+  }
 
   async sendMail(to: string, subject: string, content: string): Promise<void> {
     try {
@@ -106,13 +121,13 @@ export class EmailService {
     }
   }
 
-  async verifyConnection(): Promise<void> {
-    try {
-      await this.transporter.verify();
-      console.log('Server is ready to send emails');
-    } catch (error) {
-      console.error('Failed to verify email server connection:', error);
-      throw new Error('Failed to verify email server connection');
-    }
-  }
+  // async verifyConnection(): Promise<void> {
+  //   try {
+  //     await this.transporter.verify();
+  //     console.log('Server is ready to send emails');
+  //   } catch (error) {
+  //     console.error('Failed to verify email server connection:', error);
+  //     throw new Error('Failed to verify email server connection');
+  //   }
+  // }
 }
