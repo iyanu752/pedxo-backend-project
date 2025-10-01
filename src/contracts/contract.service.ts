@@ -111,4 +111,14 @@ export class ContractService {
   async getContractById(id: string) {
     return this.handleDatabaseOperation(() => this.contractModel.findById(id));
   }
+
+  async getAllContracts() {
+    return this.handleDatabaseOperation(async () => {
+      const contracts = await this.contractModel.find().exec();
+      if (!contracts || contracts.length === 0) {
+        throw new NotFoundException('No contracts found');
+      }
+      return contracts;
+    });
+  }
 }

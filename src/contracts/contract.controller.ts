@@ -19,6 +19,7 @@ import { CompensationDto } from './dto/compensation.dto';
 import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import { CloudinaryService } from '../s3service/s3service.service';
 import { ApiConsumes } from '@nestjs/swagger';
+import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
 
 // const fileFilter = (req, file, callback) => {
 //   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
@@ -136,6 +137,15 @@ export class ContractController {
     return this.handleRequest(
       () => this.contractService.getContract(req.user.email),
       'contracts',
+    );
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('get-all-contract')
+  getAllContracts() {
+    return this.handleRequest(
+      () => this.contractService.getAllContracts(),
+      'contracts/get-all-contract',
     );
   }
 }
