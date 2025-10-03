@@ -25,31 +25,6 @@ import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
 export class TalentController {
   constructor(private talentService: TalentService) {}
 
-  @Get()
-  async getAll(): Promise<Talent[]> {
-    return await this.talentService.getAll();
-  }
-
-  @Get(':id')
-  async getById(@Param('id') id: string): Promise<any> {
-    return await this.talentService.getById(id);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post()
-  async become(
-    @CurrentUser() user: User,
-    @Body() payload: CreateTalentDto,
-  ): Promise<any> {
-    return await this.talentService.become(user, payload);
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch()
-  async update(@Body() payload: UpdateDto, @CurrentUser() user: User) {
-    return await this.talentService.update(user, payload);
-  }
-
   // === Talent Details Routes ===
 
   @Post('details')
@@ -62,6 +37,11 @@ export class TalentController {
   @UseGuards(AdminAuthGuard)
   async findAllTalentDetails() {
     return await this.talentService.findAllTalentDetails();
+  }
+
+  @Get(':id')
+  async getById(@Param('id') id: string): Promise<any> {
+    return await this.talentService.getById(id);
   }
 
   @Get('details/:id')
@@ -80,5 +60,25 @@ export class TalentController {
   @Delete('details/:id')
   async deleteTalentDetails(@Param('id') id: string) {
     return await this.talentService.deleteTalentDetails(id);
+  }
+
+  @Get()
+  async getAll(): Promise<Talent[]> {
+    return await this.talentService.getAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Post()
+  async become(
+    @CurrentUser() user: User,
+    @Body() payload: CreateTalentDto,
+  ): Promise<any> {
+    return await this.talentService.become(user, payload);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch()
+  async update(@Body() payload: UpdateDto, @CurrentUser() user: User) {
+    return await this.talentService.update(user, payload);
   }
 }
