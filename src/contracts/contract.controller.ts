@@ -91,6 +91,11 @@ export class ContractController {
     );
   }
 
+  @Post('text-mail')
+  async sendWelcomeEmail(@Body('to') to: string) {
+    return this.contractService.emailNotify(to);
+  }
+
   @UseGuards(JWTAuthGuard)
   @Post('signature')
   @UseInterceptors(FileInterceptor('signature')) // handles multiple file uploads

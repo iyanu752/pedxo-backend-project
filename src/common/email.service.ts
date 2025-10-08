@@ -6,11 +6,14 @@ import { ContractEmailDto } from '../contracts/dto/contract.email.dto';
 export class EmailService {
   private transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorised: false,
     },
   });
 
@@ -30,7 +33,7 @@ export class EmailService {
   async sendMail(to: string, subject: string, content: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: `"Your Company" <support@pedxo.com>`,
+        from: `"Pedxo" <${process.env.GMAIL_USER}>`,
         to,
         subject,
         html: content,
@@ -88,7 +91,7 @@ export class EmailService {
   ): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: `"Your Company" <${process.env.GMAIL_USER}>`,
+        from: `"Pedxo" <${process.env.GMAIL_USER}>`,
         to,
         subject,
         text,
@@ -108,7 +111,7 @@ export class EmailService {
   ): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: `"Your Company" <${process.env.GMAIL_USER}>`,
+        from: `"Pedxo" <${process.env.GMAIL_USER}>`,
         to,
         subject,
         html: content,

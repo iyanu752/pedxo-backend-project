@@ -32,6 +32,19 @@ export class ContractService {
     }
   }
 
+  async emailNotify(to: string) {
+    try {
+      const subject = 'Test Email Sending';
+      const text = 'We miss you bruuuhhh';
+
+      await this.emailservice.sendPlainTextEmail(to, subject, text);
+
+      console.log(`email sent succcess ${to}`);
+    } catch (error) {
+      console.log(`Failed to sent mail`, error);
+    }
+  }
+
   async createOrUpdatePersonalInfo(dto: PersonalInfoDto) {
     return this.handleDatabaseOperation(async () => {
       let contract = await this.contractModel.findOne({ email: dto.email });
