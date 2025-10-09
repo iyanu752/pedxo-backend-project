@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { ContractEmailDto } from '../contracts/dto/contract.email.dto';
+import Mail from 'nodemailer/lib/mailer';
 
 @Injectable()
 export class EmailService {
@@ -13,9 +15,9 @@ export class EmailService {
       pass: process.env.GMAIL_PASSWORD,
     },
     tls: {
-      rejectUnauthorised: false,
+      rejectUnauthorized: false,
     },
-  });
+  } as SMTPTransport.Options);
 
   constructor() {
     this.verifyConnection();
@@ -107,7 +109,7 @@ export class EmailService {
     to: string,
     subject: string,
     content: string,
-    attachments: nodemailer.Attachment[],
+    attachments: Mail.Attachment[],
   ): Promise<void> {
     try {
       await this.transporter.sendMail({
@@ -123,14 +125,4 @@ export class EmailService {
       throw new Error('Failed to send email with attachment');
     }
   }
-
-  // async verifyConnection(): Promise<void> {
-  //   try {
-  //     await this.transporter.verify();
-  //     console.log('Server is ready to send emails');
-  //   } catch (error) {
-  //     console.error('Failed to verify email server connection:', error);
-  //     throw new Error('Failed to verify email server connection');
-  //   }
-  // }
 }
