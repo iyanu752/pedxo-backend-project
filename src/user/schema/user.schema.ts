@@ -41,6 +41,12 @@ export class User extends Document {
     nullable: false,
   })
   provider: AuthProvider;
+
+  @Prop({ default: null })
+  profilePic?: string;
+
+  @Prop({ default: null })
+  profilePicPublicId?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

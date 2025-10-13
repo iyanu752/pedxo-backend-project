@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { v2 as cloudinary } from 'cloudinary';
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  UploadApiErrorResponse,
+} from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
+import imageType from 'image-type';
 
 @Injectable()
 export class CloudinaryService {
@@ -12,9 +17,9 @@ export class CloudinaryService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File): Promise<UploadApiResponse> {
     // console.log('file', file)
-    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
     const maxFileSize = 2 * 1024 * 1024; // 2MB
 
     if (!file) {
@@ -28,7 +33,7 @@ export class CloudinaryService {
     if (!allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException({
         error: true,
-        message: 'Only PNG, JPEG, and SVG files are allowed',
+        message: 'Only PNG and JPEG files are allowed',
         data: null,
       });
     }
@@ -41,21 +46,51 @@ export class CloudinaryService {
       });
     }
 
+    const type = await imageType(new Uint8Array(file.buffer));
+    if (!type || !['png', 'jpg', 'webp'].includes(type.ext)) {
+      throw new BadRequestException({
+        error: true,
+        message: 'file is not a valid imageType',
+        data: null,
+      });
+    }
+
+    const ext = file.originalname.split('.').pop()?.toLowerCase();
+    const mimeToExt: { [key: string]: string } = {
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/webp': 'webp',
+    };
+    if (ext !== mimeToExt[file.mimetype]) {
+      throw new BadRequestException({
+        error: true,
+        message: 'file extension does not match MIME type',
+        data: null,
+      });
+    }
+
     return new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ resource_type: 'raw' }, (error, result) => {
-          if (error) {
-            return reject(
-              new BadRequestException({
-                error: true,
-                message: 'Cloudinary upload failed',
-                data: null,
-              }),
-            );
-          }
-          return resolve(result.secure_url);
-        })
+        .upload_stream(
+          { resource_type: 'image', folder: 'images' },
+          (error, result) => {
+            if (error || !result) {
+              return reject(
+                new BadRequestException({
+                  error: true,
+                  message: 'Cloudinary upload failed',
+                  data: null,
+                }),
+              );
+            }
+            return resolve(result);
+          },
+        )
         .end(file.buffer);
     });
+  }
+
+  async deleteImage(publicId: string): Promise<any> {
+    return cloudinary.uploader.destroy(publicId);
   }
 }

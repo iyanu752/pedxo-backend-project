@@ -13,6 +13,8 @@ import { ContractModule } from './contracts/contract.module';
 import { CloudinaryService } from './s3service/s3service.service';
 import { S3serviceModule } from './s3service/s3service.module';
 import * as dotenv from 'dotenv';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 dotenv.config();
 @Module({
   imports: [
@@ -24,6 +26,10 @@ dotenv.config();
         uri: config.get<string>('MONGO_URI'),
       }),
       inject: [ConfigService],
+    }),
+    MulterModule.register({
+      storage: memoryStorage(),
+      limits: { fileSize: 2 * 1024 * 1024 },
     }),
     UserModule,
     AuthModule,

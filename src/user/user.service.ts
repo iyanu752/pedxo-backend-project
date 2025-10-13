@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserAccessTaskItem } from 'aws-sdk/clients/appfabric';
 import { AuthProvider } from './enum/auth-provider.enum';
 import { generateRandomTokenForLoggedIn } from '../common/constant/generate.string';
+import { CloudinaryService } from '../s3service/s3service.service';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private otpService: OtpService,
     private jwtService: JwtService,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   /**
@@ -220,5 +222,47 @@ export class UserService {
     githubUser.randomToken = randomToken;
     await githubUser.save();
     return { githubUser, accessToken: token.accessToken };
+  }
+
+  async updateProfilePic(email: string, file: Express.Multer.File) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    if (user.profilePicPublicId) {
+      await this.cloudinaryService.deleteImage(user.profilePicPublicId);
+    }
+
+    const uploadResult = await this.cloudinaryService.uploadFile(file);
+
+    user.profilePic = uploadResult.secure_url;
+    user.profilePicPublicId = uploadResult.public_id;
+    await user.save();
+
+    return {
+      id: user.id,
+      message: 'user profile pic updated successfully',
+    };
+  }
+
+  async deleteProfilePic(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    if (user.profilePicPublicId) {
+      await this.cloudinaryService.deleteImage(user.profilePicPublicId);
+    }
+
+    user.profilePic = null;
+    user.profilePicPublicId = null;
+    await user.save();
+
+    return {
+      id: user.id,
+      message: 'user profile pic remove successfully',
+    };
   }
 }

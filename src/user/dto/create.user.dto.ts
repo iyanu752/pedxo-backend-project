@@ -18,4 +18,12 @@ export class CreateUserDTO {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  profilePic?: string;
+
+  @IsOptional()
+  @IsString()
+  profilePicPublicId: string;
 }

@@ -109,7 +109,9 @@ export class ContractController {
         throw new BadRequestException('File is required');
       }
 
-      const uploadedUrl = await this.cloudinaryService.uploadFile(signature);
+      const uploadResult = await this.cloudinaryService.uploadFile(signature);
+      const uploadedUrl =
+        (uploadResult as any)?.secure_url || (uploadResult as any)?.url || '';
 
       return this.handleRequest(
         () => this.contractService.submitSignature(req.user.email, uploadedUrl),

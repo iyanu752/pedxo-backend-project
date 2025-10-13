@@ -8,6 +8,10 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Delete,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schema/user.schema';
@@ -16,6 +20,8 @@ import { CurrentUser } from 'src/common/decorator/current.logged.user';
 import { UpdateUserDTO } from './dto/update.user.dto';
 import { Serialize } from 'src/common/interceptor/custom.interceptor';
 import { AllUserDto, UserDto } from './dto/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+// import { AuthGuard as Guard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -50,5 +56,21 @@ export class UserController {
   @Get('delete/:username')
   async deleteUser(@Param('username') username: string) {
     return await this.userService.deleteUserByUsername(username);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('me/profile-pic')
+  @UseInterceptors(FileInterceptor('profilePic'))
+  async updateProfile(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: User,
+  ): Promise<{ message: string; updatedUser?: User }> {
+    return this.userService.updateProfilePic(user.email, file);
+  }
+
+  @Delete('me/profile-pic')
+  @UseGuards(AuthGuard)
+  async deleteProfilePic(@CurrentUser() user: User) {
+    return await this.userService.deleteProfilePic(user.email);
   }
 }

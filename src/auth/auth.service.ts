@@ -250,6 +250,7 @@ export class AuthService {
         lastName,
         email,
         provider: AuthProvider.GOOGLE,
+        profilePic: googleUser.profilePic,
       };
 
       const { googleUser: createdUser } =
@@ -286,6 +287,7 @@ export class AuthService {
         lastName,
         email,
         provider: AuthProvider.GITHUB,
+        profilePic: githubUser.profilePic,
       };
 
       const { githubUser: createdUser } =
