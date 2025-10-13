@@ -35,7 +35,7 @@ export class AdminService {
     await this.userService.findUserById(id);
     const userSuspended = await this.userService.suspendUserAccount(id);
     if (userSuspended.isTalent === true) {
-      const userId = userSuspended._id;
+      const userId = String(userSuspended._id);
       await this.suspendTalent(userId);
     }
   }
@@ -52,7 +52,7 @@ export class AdminService {
     await this.userService.findUserById(id);
     const unSuspendedUser = await this.userService.unsuspendUserAccount(id);
     if (unSuspendedUser.isTalent === true) {
-      const userId = unSuspendedUser._id;
+      const userId = String(unSuspendedUser._id);
       await this.unSuspendTalent(userId);
     }
   }

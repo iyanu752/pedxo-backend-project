@@ -18,8 +18,7 @@ export class HireController {
   @Get('assigned-by-user')
   @UseGuards(AuthGuard)
   getByUser(@CurrentUser() user: User) {
-    // console.log(user._id);
-    return this.hireService.getAssignedTalentsByUser(user._id);
+    return this.hireService.getAssignedTalentsByUser(String(user._id));
   }
 
   @Get('assigned-by-hire')

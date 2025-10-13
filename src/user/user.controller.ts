@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schema/user.schema';
 import { AuthGuard } from 'src/auth/customGuard/guard.custom';
@@ -32,7 +22,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get('/profile')
   async dashboard(@CurrentUser() user: User) {
-    const currentUser = await this.userService.findUserById(user._id);
+    const currentUser = await this.userService.findUserById(String(user._id));
     return currentUser;
   }
 

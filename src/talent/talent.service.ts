@@ -75,7 +75,7 @@ export class TalentService {
   async update(user: User, body: UpdateDto) {
     const userId = user._id;
     const [userExist, updateTalent] = await Promise.all([
-      this.userService.findUserById(userId),
+      this.userService.findUserById(String(userId)),
       this.talentModel.findOneAndUpdate({ userId }, { body }, { new: true }),
     ]);
 
