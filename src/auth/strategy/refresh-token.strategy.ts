@@ -10,9 +10,10 @@ export class RefreshTokenStrategy extends PassportStrategy(
   'jwt-refresh',
 ) {
   constructor() {
+    const refreshSecret = ENVIRONMENT.JWT.JWT_REFRESH_SECRET;
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: ENVIRONMENT.JWT.JWT_REFRESH_SECRET,
+      secretOrKey: refreshSecret,
       passReqToCallback: true,
     });
   }
