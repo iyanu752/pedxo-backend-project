@@ -2,15 +2,17 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as dotenv from 'dotenv';
+import { ENVIRONMENT } from 'src/common/constant/enivronment/enviroment';
 
 dotenv.config(); // Load environment variables
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
+    const secret = ENVIRONMENT.JWT.JWT_SECRET;
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET, // Use dotenv instead of ConfigService
+      secretOrKey: secret,
     });
   }
 

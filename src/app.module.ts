@@ -10,6 +10,7 @@ import { OtpModule } from './otp/otp.module';
 import { OutSourceModule } from './outsource/outsource.module';
 import { BookDemoModule } from './bookdemo/module/demo.module';
 import { ContractModule } from './contracts/contract.module';
+import { EmailModule } from './email/email.module';
 import { CloudinaryService } from './s3service/s3service.service';
 import { S3serviceModule } from './s3service/s3service.module';
 import * as dotenv from 'dotenv';
@@ -41,6 +42,7 @@ dotenv.config();
     BookDemoModule,
     ContractModule,
     S3serviceModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [CloudinaryService],

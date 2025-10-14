@@ -4,9 +4,6 @@ import {
   Get,
   Param,
   Patch,
-  Post,
-  Put,
-  Query,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -38,7 +35,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get('/profile')
   async dashboard(@CurrentUser() user: User) {
-    const currentUser = await this.userService.findUserById(user._id);
+    const currentUser = await this.userService.findUserById(String(user._id));
     return currentUser;
   }
 
