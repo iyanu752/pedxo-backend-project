@@ -1,10 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 export type ContractDocument = Contract & Document;
 
 @Schema({ timestamps: true })
 export class Contract {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, default: 'null' })
+  userId: string;
+
   @Prop({ required: true })
   clientName: string;
 
@@ -60,6 +63,9 @@ export class Contract {
 
   @Prop({ default: false }) // Marks contract as completed
   isCompleted: boolean;
+
+  @Prop({ type: [String] })
+  talentAssignedId?: string[];
 }
 
 export const ContractSchema = SchemaFactory.createForClass(Contract);

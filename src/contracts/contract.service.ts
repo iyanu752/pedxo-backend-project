@@ -45,12 +45,16 @@ export class ContractService {
     }
   }
 
-  async createOrUpdatePersonalInfo(dto: PersonalInfoDto) {
+  async createOrUpdatePersonalInfo(userId: string, dto: PersonalInfoDto) {
     return this.handleDatabaseOperation(async () => {
+      const newDto = { userId, ...dto };
       let contract = await this.contractModel.findOne({ email: dto.email });
 
       if (!contract) {
-        contract = new this.contractModel({ ...dto, progress: 'job-details' });
+        contract = new this.contractModel({
+          ...newDto,
+          progress: 'job-details',
+        });
         return contract.save();
       }
 

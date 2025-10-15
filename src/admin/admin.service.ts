@@ -65,8 +65,8 @@ export class AdminService {
     return await this.talentService.unSuspendTalent(id);
   }
 
-  async asignTallet(talentIds: string[], hierId: string) {
-    return await this.hierServic.assignTalent(talentIds, hierId);
+  async asignTallet(talentIds: string[], contractId: string) {
+    return await this.hierServic.assignTalent(talentIds, contractId);
   }
 
   async create(dto: CreateAdminDto) {

@@ -10,22 +10,22 @@ import { Hire } from './schemas/hire.schema';
 import { Model } from 'mongoose';
 import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
 import { ContractService } from 'src/contracts/contract.service';
+import { Contract } from 'src/contracts/schemas/contract.schema';
 
 @Injectable()
 export class HireService {
   constructor(
     @InjectModel(Hire.name) private hireModel: Model<Hire>,
+    @InjectModel(Contract.name) private contractModel: Model<Contract>,
     private readonly talentRepo: TalentDetailsRepository,
     private readonly contractService: ContractService,
   ) {}
 
-  private async _formatAssignedTalents(hire: Hire) {
-    const contract = await this.contractService.getContractById(
-      hire.contractId,
-    );
+  private async _formatAssignedTalents(contractId: string) {
+    const contract = await this.contractService.getContractById(contractId);
 
     const assignedTalents = await Promise.all(
-      (hire.talentAssignedId || []).map(async (talentId) => {
+      (contract.talentAssignedId || []).map(async (talentId) => {
         const talent = await this.talentRepo.findByTalentId(talentId);
         if (!talent) return null;
 
@@ -75,16 +75,18 @@ export class HireService {
     return hiredTalent;
   }
 
-  async assignTalent(talentAssignedId: string[], hireId: string) {
+  async assignTalent(talentAssignedId: string[], contractId: string) {
     try {
-      const hire = await this.hireModel.findById(hireId);
-      if (!hire) {
-        return {
-          error: true,
-          message: 'Hire with this ID does not exist',
-          data: null,
-        };
-      }
+      // const hire = await this.hireModel.findById(hireId);
+      // if (!hire) {
+      //   return {
+      //     error: true,
+      //     message: 'Hire with this ID does not exist',
+      //     data: null,
+      //   };
+      // }
+
+      const contract = await this.contractModel.findById(contractId);
 
       for (const id of talentAssignedId) {
         const talentExists = await this.talentRepo.findByTalentId(id);
@@ -97,13 +99,13 @@ export class HireService {
         }
       }
 
-      hire.talentAssignedId = talentAssignedId;
-      await hire.save();
+      contract.talentAssignedId = talentAssignedId;
+      await contract.save();
 
       return {
         error: false,
         message: 'Talents assigned successfully',
-        data: hire,
+        data: contract,
       };
     } catch (e) {
       return {
@@ -116,10 +118,10 @@ export class HireService {
 
   async getAssignedTalentsByUser(userId: string) {
     try {
-      const hires = await this.hireModel.find({ userId });
+      const contracts = await this.contractModel.find({ userId });
 
       // console.log('hires', hires);
-      if (!hires) {
+      if (!contracts) {
         return {
           error: true,
           message: 'Hire with this ID does not exist',
@@ -129,13 +131,13 @@ export class HireService {
 
       const result = [];
 
-      for (const hire of hires) {
-        const contract = await this.contractService.getContractById(
-          hire.contractId,
-        );
+      for (const contract of contracts) {
+        // const contract = await this.contractService.getContractById(
+        //   hire.contractId,
+        // );
 
         const enrichedTalents = await Promise.all(
-          (hire.talentAssignedId || []).map(async (talentId) => {
+          (contract.talentAssignedId || []).map(async (talentId) => {
             const talent = await this.talentRepo.findByTalentId(talentId);
             if (!talent) return null;
 
@@ -153,8 +155,7 @@ export class HireService {
         );
 
         result.push({
-          hireId: hire._id,
-          contractId: hire.contractId,
+          contractId: contract._id,
           assignedTalents: enrichedTalents.filter(Boolean),
         });
       }
@@ -173,39 +174,39 @@ export class HireService {
     }
   }
 
-  async getAssignedTalentByHireId(hireId: string) {
-    try {
-      const hire = await this.hireModel.findById(hireId);
-      if (!hire) {
-        return {
-          error: true,
-          message: 'No hire found with this ID',
-          data: null,
-        };
-      }
+  // async getAssignedTalentByHireId(hireId: string) {
+  //   try {
+  //     const hire = await this.hireModel.findById(hireId);
+  //     if (!hire) {
+  //       return {
+  //         error: true,
+  //         message: 'No hire found with this ID',
+  //         data: null,
+  //       };
+  //     }
 
-      return this._formatAssignedTalents(hire);
-    } catch (error) {
-      return {
-        error: true,
-        message: `Error getting assigned talents by hireId: ${error.message}`,
-        data: null,
-      };
-    }
-  }
+  //     return this._formatAssignedTalents(hire);
+  //   } catch (error) {
+  //     return {
+  //       error: true,
+  //       message: `Error getting assigned talents by hireId: ${error.message}`,
+  //       data: null,
+  //     };
+  //   }
+  // }
 
   async getAssignedTalentByContractId(contractId: string) {
     try {
-      const hire = await this.hireModel.findOne({ contractId });
-      if (!hire) {
+      const contract = await this.contractModel.findById(contractId);
+      if (!contract) {
         return {
           error: true,
-          message: 'No hire found with this contract ID',
+          message: 'No Contract found with this contract ID',
           data: null,
         };
       }
 
-      return this._formatAssignedTalents(hire);
+      return this._formatAssignedTalents(contractId);
     } catch (error) {
       return {
         error: true,

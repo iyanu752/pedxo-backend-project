@@ -5,5 +5,5 @@ export class assignTalaentDto {
   @IsString({ each: true })
   talentIds: string[];
   @IsString()
-  hierId: string;
+  contractId: string;
 }

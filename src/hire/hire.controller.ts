@@ -21,10 +21,10 @@ export class HireController {
     return this.hireService.getAssignedTalentsByUser(String(user._id));
   }
 
-  @Get('assigned-by-hire')
-  getAssignedTalentByHire(@Query('hireId') hireId: string) {
-    return this.hireService.getAssignedTalentByHireId(hireId);
-  }
+  // @Get('assigned-by-hire')
+  // getAssignedTalentByHire(@Query('hireId') hireId: string) {
+  //   return this.hireService.getAssignedTalentByHireId(hireId);
+  // }
 
   @Get('assigned-by-contract')
   getAssignedTalentByContract(@Query('contractId') contractId: string) {

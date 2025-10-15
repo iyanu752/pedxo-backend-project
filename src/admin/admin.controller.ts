@@ -65,9 +65,9 @@ export class AdminController {
     return await this.adminService.unSuspendTalent(id);
   }
 
-  @Patch('asign-tallet')
+  @Patch('assign-talent')
   @UseGuards(AdminAuthGuard)
   async asignTallet(@Body() payload: assignTalaentDto) {
-    return this.adminService.asignTallet(payload.talentIds, payload.hierId);
+    return this.adminService.asignTallet(payload.talentIds, payload.contractId);
   }
 }

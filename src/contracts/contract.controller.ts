@@ -66,9 +66,10 @@ export class ContractController {
 
   @UseGuards(JWTAuthGuard)
   @Post('personal-info')
-  createOrUpdatePersonalInfo(@Body() dto: PersonalInfoDto) {
+  createOrUpdatePersonalInfo(@Req() req, @Body() dto: PersonalInfoDto) {
     return this.handleRequest(
-      () => this.contractService.createOrUpdatePersonalInfo(dto),
+      () =>
+        this.contractService.createOrUpdatePersonalInfo(req.user.userId, dto),
       'contracts/personal-info',
     );
   }
