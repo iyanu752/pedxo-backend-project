@@ -119,9 +119,9 @@ export class ContractService {
     );
   }
 
-  async getContract(email: string) {
+  async getContract(userId: string) {
     return this.handleDatabaseOperation(() =>
-      this.contractModel.findOne({ email }),
+      this.contractModel.find({ userId }),
     );
   }
 

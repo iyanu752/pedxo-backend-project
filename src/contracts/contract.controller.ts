@@ -68,8 +68,7 @@ export class ContractController {
   @Post('personal-info')
   createOrUpdatePersonalInfo(@Req() req, @Body() dto: PersonalInfoDto) {
     return this.handleRequest(
-      () =>
-        this.contractService.createOrUpdatePersonalInfo(req.user.userId, dto),
+      () => this.contractService.createOrUpdatePersonalInfo(req.user._id, dto),
       'contracts/personal-info',
     );
   }
@@ -140,10 +139,10 @@ export class ContractController {
   }
 
   @UseGuards(JWTAuthGuard)
-  @Get('')
+  @Get('get-user-contracts')
   getContract(@Req() req) {
     return this.handleRequest(
-      () => this.contractService.getContract(req.user.email),
+      () => this.contractService.getContract(req.user._id),
       'contracts',
     );
   }
