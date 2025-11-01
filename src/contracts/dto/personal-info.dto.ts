@@ -14,7 +14,7 @@ export class PersonalInfoDto {
   country: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   region: string;
 
   @IsString()
@@ -23,6 +23,6 @@ export class PersonalInfoDto {
 
   @IsString()
   @IsNotEmpty()
-  contractType:string;
+  contractType: string;
 
 }
