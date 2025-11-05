@@ -87,9 +87,16 @@ export class HireService {
       // }
 
       const contract = await this.contractModel.findById(contractId);
-
+      if (!contract) {
+        return {
+          error: true,
+          message: 'Contract with this ID does not exist',
+          data: null,
+        };
+      }
       for (const id of talentAssignedId) {
         const talentExists = await this.talentRepo.findByTalentId(id);
+
         if (!talentExists) {
           return {
             error: true,
@@ -99,13 +106,17 @@ export class HireService {
         }
       }
 
-      contract.talentAssignedId = talentAssignedId;
-      await contract.save();
+      const updatedContract = await this.contractModel.findByIdAndUpdate(
+        contractId,
+        { $addToSet: { talentAssignedId: { $each: talentAssignedId } } },
+        { new: true }, // Return updated document
+      );
+      // console.log('new', updatedContract);
 
       return {
         error: false,
         message: 'Talents assigned successfully',
-        data: contract,
+        data: updatedContract,
       };
     } catch (e) {
       return {
