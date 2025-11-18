@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+// import mongoose, { Document } from 'mongoose';
 
 export type ContractDocument = Contract & Document;
 
 @Schema({ timestamps: true })
 export class Contract {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, default: 'null' })
+  @Prop({ type: String, default: null })
   userId: string;
 
   @Prop({ required: true })
