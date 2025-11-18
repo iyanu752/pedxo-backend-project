@@ -31,7 +31,7 @@ export class JWTAuthGuard implements CanActivate {
 
       // Attach user info to request
       request.user = {
-        userId: decodedToken.userId, // Assuming JWT `sub` contains user ID
+        _id: decodedToken._id, // Assuming JWT `sub` contains user ID
         email: decodedToken.email,
       };
 
