@@ -25,6 +25,7 @@ import { AuthGuard } from './customGuard/guard.custom';
 import { CurrentUser } from 'src/common/decorator/current.logged.user';
 import { User } from 'src/user/schema/user.schema';
 import { AuthGuard as Guard } from '@nestjs/passport';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -43,8 +44,18 @@ export class AuthController {
   }
 
   @Post('verify-email')
-  async verifyEmail(@Body() payload: VerifyEmailDto) {
-    return await this.authService.verifyEmail(payload);
+  async verifyEmail(@Body() payload: VerifyEmailDto, @Res() res: Response) {
+    const { accessToken } = await this.authService.verifyEmail(payload);
+
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 1, // 1 day
+    });
+
+    // Redirect frontend
+    return res.redirect('https://your-frontend.com/dashboard');
   }
 
   @Post('forgot-password')

@@ -103,7 +103,13 @@ export class AuthService {
 
     await user.save();
 
-    return 'Account is now verified';
+    const tokens = await this.token(user);
+
+    return {
+      user,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 
   async forgotPassword(payload: ForgetPasswordDto) {

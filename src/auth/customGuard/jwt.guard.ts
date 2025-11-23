@@ -12,15 +12,21 @@ export class JWTAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers['authorization'];
 
-    if (!authHeader) {
-      throw new UnauthorizedException('Unauthorized: No token provided');
-    }
+    // 1. Check cookie first
+    let token = request.cookies?.access_token;
 
-    const token = authHeader.split(' ')[1];
+    // 2. If no cookie, fallback to Bearer token
     if (!token) {
-      throw new UnauthorizedException('Unauthorized: Invalid token format');
+      const authHeader = request.headers['authorization'];
+      if (!authHeader) {
+        throw new UnauthorizedException('Unauthorized: No token provided');
+      }
+
+      token = authHeader.split(' ')[1];
+      if (!token) {
+        throw new UnauthorizedException('Unauthorized: Invalid token format');
+      }
     }
 
     try {
