@@ -64,8 +64,12 @@ export class AuthService {
     }
 
     if (!user.isEmailVerified) {
+      await this.otpService.sendOtp({
+        email: user.email,
+        type: OtpType.EMAIL_VERIFICATION,
+      });
       throw new BadRequestException(
-        'You have to verify you account before logging in',
+        'You have to verify you account before logging in. Check your mail for otp',
       );
     }
 
@@ -86,8 +90,9 @@ export class AuthService {
 
   async verifyEmail(payload: VerifyEmailDto) {
     const { email, code } = payload;
-
+    // console.log('pay ser', payload);
     const user = await this.userService.findUserByEmail(email);
+    // console.log('user', user);
 
     await this.otpService.verifyOTP({
       email: email,
@@ -102,8 +107,10 @@ export class AuthService {
     user.isEmailVerified = true;
 
     await user.save();
+    // console.log('new user', user);
 
     const tokens = await this.token(user);
+    // console.log('token', tokens);
 
     return {
       user,

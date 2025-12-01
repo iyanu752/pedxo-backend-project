@@ -45,8 +45,9 @@ export class AuthController {
 
   @Post('verify-email')
   async verifyEmail(@Body() payload: VerifyEmailDto, @Res() res: Response) {
+    // console.log('contr pay', payload);
     const { accessToken } = await this.authService.verifyEmail(payload);
-
+    // console.log('access', accessToken);
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: true,
@@ -55,7 +56,7 @@ export class AuthController {
     });
 
     // Redirect frontend
-    return res.redirect('https://your-frontend.com/dashboard');
+    return res.redirect('https://pedxo.com/dashboard');
   }
 
   @Post('forgot-password')
