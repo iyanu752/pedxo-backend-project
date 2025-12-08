@@ -55,8 +55,12 @@ export class AuthController {
       maxAge: 1000 * 60 * 60 * 1, // 1 day
     });
 
-    // Redirect frontend
-    return res.redirect('https://pedxo.com/dashboard');
+    // Send a clean JSON response
+    return res.status(200).json({
+      success: true,
+      message:
+        'Email verified successfully. You are now being redirected to your dashboard.',
+    });
   }
 
   @Post('forgot-password')
