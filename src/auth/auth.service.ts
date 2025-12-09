@@ -113,7 +113,8 @@ export class AuthService {
     // console.log('token', tokens);
 
     return {
-      user,
+      message: 'Email verified successfully. You are now being redirected to your dashboard.',
+      result: user,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };

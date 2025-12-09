@@ -46,21 +46,21 @@ export class AuthController {
   @Post('verify-email')
   async verifyEmail(@Body() payload: VerifyEmailDto, @Res() res: Response) {
     // console.log('contr pay', payload);
-    const { accessToken } = await this.authService.verifyEmail(payload);
+    return await this.authService.verifyEmail(payload);
     // console.log('access', accessToken);
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 1, // 1 day
-    });
+    // res.cookie('access_token', accessToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: 'lax',
+    //   maxAge: 1000 * 60 * 60 * 1, // 1 day
+    // });
 
-    // Send a clean JSON response
-    return res.status(200).json({
-      success: true,
-      message:
-        'Email verified successfully. You are now being redirected to your dashboard.',
-    });
+    // // Send a clean JSON response
+    // return res.status(200).json({
+    //   success: true,
+    //   message:
+    //     'Email verified successfully. You are now being redirected to your dashboard.',
+    // });
   }
 
   @Post('forgot-password')
