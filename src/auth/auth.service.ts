@@ -126,6 +126,14 @@ export class AuthService {
 
     const user = await this.userService.findUserByEmail(email);
 
+    if (!user) {
+      return {
+        error: true,
+        message: 'Account with this email does not exist',
+        data: null,
+      };
+    }
+
     await this.otpService.sendOtp({
       email: email,
       type: OtpType.RESET_PASSWORD,

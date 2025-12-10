@@ -49,9 +49,6 @@ export class OtpService {
   }
 
   async verifyOTP(payload: VerifyOTPDto): Promise<Boolean> {
-    // const { code, type } = payload;
-    // const otpExist = await this.validateOtp({ code, type });
-    // console.log('otp exist', otpExist);
     const otpExist = await this.validateOtp(payload);
     await this.otpModel.findByIdAndDelete(otpExist._id);
 
@@ -61,7 +58,10 @@ export class OtpService {
   async validateOtp(payload: ValidateOtpDto) {
     const { email, code, type } = payload;
 
-    const otp = await this.otpModel.findOne({ email, code, type });
+    const query: any = { code, type };
+    if (email) query.email = email; // only apply email filter when provided
+
+    const otp = await this.otpModel.findOne(query);
 
     // console.log('otp', otp);
     if (!otp) {
