@@ -49,17 +49,21 @@ export class OtpService {
   }
 
   async verifyOTP(payload: VerifyOTPDto): Promise<Boolean> {
-    const { code, type } = payload;
-    const otpExist = await this.validateOtp({ code, type });
-
+    // const { code, type } = payload;
+    // const otpExist = await this.validateOtp({ code, type });
+    // console.log('otp exist', otpExist);
+    const otpExist = await this.validateOtp(payload);
     await this.otpModel.findByIdAndDelete(otpExist._id);
 
     return true;
   }
 
   async validateOtp(payload: ValidateOtpDto) {
-    const { code, type } = payload;
-    const otp = await this.otpModel.findOne({ code, type });
+    const { email, code, type } = payload;
+
+    const otp = await this.otpModel.findOne({ email, code, type });
+
+    // console.log('otp', otp);
     if (!otp) {
       throw new BadGatewayException(
         'Your code has either expire or is Invalid',

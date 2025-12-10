@@ -44,7 +44,7 @@ export class AuthController {
   }
 
   @Post('verify-email')
-  async verifyEmail(@Body() payload: VerifyEmailDto, @Res() res: Response) {
+  async verifyEmail(@Body() payload: VerifyEmailDto) {
     // console.log('contr pay', payload);
     return await this.authService.verifyEmail(payload);
     // console.log('access', accessToken);

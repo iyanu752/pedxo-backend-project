@@ -93,16 +93,16 @@ export class AuthService {
     // console.log('pay ser', payload);
     const user = await this.userService.findUserByEmail(email);
     // console.log('user', user);
-
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Your account is verify already');
+    }
     await this.otpService.verifyOTP({
       email: email,
       code: code,
       type: OtpType.EMAIL_VERIFICATION,
     });
 
-    if (user.isEmailVerified) {
-      throw new BadRequestException('Your account is verify already');
-    }
+    // console.log('sucesss');
 
     user.isEmailVerified = true;
 
@@ -113,7 +113,8 @@ export class AuthService {
     // console.log('token', tokens);
 
     return {
-      message: 'Email verified successfully. You are now being redirected to your dashboard.',
+      message:
+        'Email verified successfully. You are now being redirected to your dashboard.',
       result: user,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
