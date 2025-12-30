@@ -9,6 +9,8 @@ import {
   BadRequestException,
   UseGuards,
   Req,
+  Query,
+  Res,
   // InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,7 +22,7 @@ import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import { CloudinaryService } from '../s3service/s3service.service';
 import { ApiConsumes } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
-
+import { Request, Response } from 'express';
 // const fileFilter = (req, file, callback) => {
 //   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
 //   if (!allowedTypes.includes(file.mimetype)) {
@@ -37,12 +39,14 @@ import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
 //   fileFilter,
 // };
 
+const CONTRACT_DETAILS = 'CONTRACT_DETAILS';
+
 @Controller('contracts')
 export class ContractController {
   constructor(
     private readonly contractService: ContractService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   private async handleRequest<T>(operation: () => Promise<T>, path: string) {
     try {
@@ -64,9 +68,21 @@ export class ContractController {
     }
   }
 
+  // private getContractIdFromCookies(
+  //   req: Request
+  // ): string {
+  //   const contractCookie = req.cookies?.[CONTRACT_DETAILS];
+
+  //   if (!contractCookie || !contractCookie._id) {
+  //     throw new BadRequestException('Contract details not found in cookies');
+  //   }
+
+  //   return contractCookie._id;
+  // }
+
   @UseGuards(JWTAuthGuard)
   @Post('personal-info')
-  createOrUpdatePersonalInfo(@Req() req, @Body() dto: PersonalInfoDto) {
+  createOrUpdatePersonalInfo(@Req() req, @Res({ passthrough: true }) res: Response, @Body() dto: PersonalInfoDto) {
     return this.handleRequest(
       () => this.contractService.createOrUpdatePersonalInfo(req.user._id, dto),
       'contracts/personal-info',
@@ -75,18 +91,26 @@ export class ContractController {
 
   @UseGuards(JWTAuthGuard)
   @Patch('job-details')
-  updateJobDetails(@Req() req, @Body() dto: JobDetailsDto) {
+  updateJobDetails(
+    // @Req() req: Request,
+    @Body() dto: JobDetailsDto,
+    @Query('contractId') contractId: string
+  ) {
     return this.handleRequest(
-      () => this.contractService.updateJobDetails(req.user.email, dto),
+      () => this.contractService.updateJobDetails(contractId, dto),
       'contracts/job-details',
     );
   }
 
   @UseGuards(JWTAuthGuard)
   @Patch('compensation')
-  updateCompensation(@Req() req, @Body() dto: CompensationDto) {
+  updateCompensation(
+    // @Req() req: Request,
+    @Body() dto: CompensationDto,
+    @Query('contractId') contractId: string
+  ) {
     return this.handleRequest(
-      () => this.contractService.updateCompensation(req.user.email, dto),
+      () => this.contractService.updateCompensation(contractId, dto),
       'contracts/compensation',
     );
   }
@@ -102,7 +126,8 @@ export class ContractController {
   @ApiConsumes('multipart/form-data')
   async uploadSignature(
     @UploadedFile() signature: Express.Multer.File,
-    @Req() req,
+    // @Req() req: Request,
+    @Query('contractId') contractId: string
   ) {
     try {
       if (!signature) {
@@ -114,7 +139,7 @@ export class ContractController {
         (uploadResult as any)?.secure_url || (uploadResult as any)?.url || '';
 
       return this.handleRequest(
-        () => this.contractService.submitSignature(req.user.email, uploadedUrl),
+        () => this.contractService.submitSignature(contractId, uploadedUrl),
         'contracts/signature',
       );
     } catch (err) {
@@ -131,11 +156,25 @@ export class ContractController {
 
   @UseGuards(JWTAuthGuard)
   @Patch('finalize')
-  finalizeContract(@Req() req) {
+  finalizeContract(
+    // @Req() req: Request,
+    @Query('contractId') contractId: string
+  ) {
     return this.handleRequest(
-      () => this.contractService.finalizeContract(req.user.email),
+      () => this.contractService.finalizeContract(contractId),
       'contracts/finalize',
     );
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Get('get-contract')
+  getContractById(
+    @Query('contractId') contractId: string
+  ) {
+    return this.handleRequest(
+      () => this.contractService.getContractById(contractId),
+      'contracts/get-contract',
+    )
   }
 
   @UseGuards(JWTAuthGuard)

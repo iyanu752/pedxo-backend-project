@@ -63,35 +63,34 @@ export class ContractService {
     });
   }
 
-  async updateJobDetails(email: string, dto: JobDetailsDto) {
-    return this.updateContract(email, dto, 'compensation');
+  async updateJobDetails(contractId: string, dto: JobDetailsDto) {
+    return this.updateContract(contractId, dto, 'compensation');
   }
 
-  async updateCompensation(email: string, dto: CompensationDto) {
-    return this.updateContract(email, dto, 'review');
+  async updateCompensation(contractId: string, dto: CompensationDto) {
+    return this.updateContract(contractId, dto, 'review');
   }
 
-  async submitSignature(email: string, signatureUrl: string) {
+  async submitSignature(contractId: string, signatureUrl: string) {
     return this.handleDatabaseOperation(async () => {
       return this.contractModel.findOneAndUpdate(
-        { email },
+        { _id: contractId },
         { $set: { signature: signatureUrl, progress: 'signed' } },
         { new: true },
       );
     });
   }
 
-  async finalizeContract(email: string) {
+  async finalizeContract(contractId: string) {
     try {
       // console.log('email', email);
       const contract = await this.contractModel.findOneAndUpdate(
-        { email },
+        { _id: contractId },
         { $set: { isCompleted: true } },
         { new: true },
       );
       // console.log('fetched contrract', contract);
       const contractDto = new ContractEmailDto(contract);
-      // console.log(' contrract dto', contractDto);
       await this.emailservice.sendContractEmail(contractDto);
 
       return {
@@ -109,13 +108,16 @@ export class ContractService {
     }
   }
 
-  private async updateContract(email: string, dto: any, nextProgress: string) {
-    return this.handleDatabaseOperation(() =>
-      this.contractModel.findOneAndUpdate(
-        { email },
+  private async updateContract(contractId: string, dto: any, nextProgress: string) {
+    return await this.handleDatabaseOperation(async () => {
+      const contract = await this.contractModel.find({ _id: contractId });
+      console.log(contract);
+      return this.contractModel.findOneAndUpdate(
+        { _id: contractId },
         { $set: { ...dto, progress: nextProgress } },
         { new: true },
-      ),
+      )
+    }
     );
   }
 

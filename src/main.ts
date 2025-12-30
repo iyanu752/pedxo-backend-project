@@ -11,9 +11,11 @@ async function bootstrap() {
   app.enableCors({
     origin: '*', // Allow all origins
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Allow all HTTP methods
-    allowedHeaders: '*', // Allow all headers
+    allowedHeaders: '*', // Allow all headers,
+    credentials: true, // Allow credentials
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.listen(PORT);
+  console.log(`Application is running on: http://localhost:${PORT}`)
 }
 bootstrap();
