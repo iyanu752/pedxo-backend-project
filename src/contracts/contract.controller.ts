@@ -181,7 +181,7 @@ export class ContractController {
   @Get('get-user-contracts')
   getContract(@Req() req) {
     return this.handleRequest(
-      () => this.contractService.getContract(req.user._id),
+      () => this.contractService.getContract(req.user.email),
       'contracts/get-user-contracts',
     );
   }
