@@ -95,8 +95,9 @@ export class HireService {
         };
       }
       for (const id of talentAssignedId) {
+      
         const talentExists = await this.talentRepo.findByTalentId(id);
-
+       
         if (!talentExists) {
           return {
             error: true,
@@ -111,7 +112,6 @@ export class HireService {
         { $addToSet: { talentAssignedId: { $each: talentAssignedId } } },
         { new: true }, // Return updated document
       );
-      // console.log('new', updatedContract);
 
       return {
         error: false,

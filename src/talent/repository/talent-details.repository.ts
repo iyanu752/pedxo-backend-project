@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   TalentDetails,
   TalentDetailsDocument,
@@ -30,7 +30,7 @@ export class TalentDetailsRepository {
   }
 
   async findByTalentId(talentId: string): Promise<TalentDetails | null> {
-    return this.model.findOne({ talentId }).exec();
+    return this.model.findOne({ talentId: new Types.ObjectId(talentId) }).exec();
   }
 
   async updateById(

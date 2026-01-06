@@ -47,19 +47,21 @@ export class ContractService {
 
   async createOrUpdatePersonalInfo(userId: string, dto: PersonalInfoDto) {
     return this.handleDatabaseOperation(async () => {
-      const newDto = { userId, ...dto };
-      let contract = await this.contractModel.findOne({ email: dto.email });
+      // const newDto = { userId, ...dto };
+      // let contract = await this.contractModel.findOne({ email: dto.email });
 
-      if (!contract) {
-        contract = new this.contractModel({
-          ...newDto,
-          progress: 'job-details',
-        });
-        return contract.save();
-      }
-
-      Object.assign(contract, { ...dto, progress: 'job-details' });
+      // if (!contract) {
+      const contract = new this.contractModel({
+        userId,
+        ...dto,
+        progress: 'job-details',
+      });
+      // console.log('contract', contract);
       return contract.save();
+      // }
+
+      // Object.assign(contract, { ...dto, progress: 'job-details' });
+      // return contract.save();
     });
   }
 
@@ -111,7 +113,7 @@ export class ContractService {
   private async updateContract(contractId: string, dto: any, nextProgress: string) {
     return await this.handleDatabaseOperation(async () => {
       const contract = await this.contractModel.find({ _id: contractId });
-      console.log(contract);
+      // console.log(contract);
       return this.contractModel.findOneAndUpdate(
         { _id: contractId },
         { $set: { ...dto, progress: nextProgress } },
