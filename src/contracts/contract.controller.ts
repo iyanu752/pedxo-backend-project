@@ -46,7 +46,7 @@ export class ContractController {
   constructor(
     private readonly contractService: ContractService,
     private readonly cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   private async handleRequest<T>(operation: () => Promise<T>, path: string) {
     try {
@@ -82,7 +82,11 @@ export class ContractController {
 
   @UseGuards(JWTAuthGuard)
   @Post('personal-info')
-  createOrUpdatePersonalInfo(@Req() req, @Res({ passthrough: true }) res: Response, @Body() dto: PersonalInfoDto) {
+  createOrUpdatePersonalInfo(
+    @Req() req,
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: PersonalInfoDto,
+  ) {
     return this.handleRequest(
       () => this.contractService.createOrUpdatePersonalInfo(req.user._id, dto),
       'contracts/personal-info',
@@ -94,7 +98,7 @@ export class ContractController {
   updateJobDetails(
     // @Req() req: Request,
     @Body() dto: JobDetailsDto,
-    @Query('contractId') contractId: string
+    @Query('contractId') contractId: string,
   ) {
     return this.handleRequest(
       () => this.contractService.updateJobDetails(contractId, dto),
@@ -107,7 +111,7 @@ export class ContractController {
   updateCompensation(
     // @Req() req: Request,
     @Body() dto: CompensationDto,
-    @Query('contractId') contractId: string
+    @Query('contractId') contractId: string,
   ) {
     return this.handleRequest(
       () => this.contractService.updateCompensation(contractId, dto),
@@ -127,7 +131,7 @@ export class ContractController {
   async uploadSignature(
     @UploadedFile() signature: Express.Multer.File,
     // @Req() req: Request,
-    @Query('contractId') contractId: string
+    @Query('contractId') contractId: string,
   ) {
     try {
       if (!signature) {
@@ -158,7 +162,7 @@ export class ContractController {
   @Patch('finalize')
   finalizeContract(
     // @Req() req: Request,
-    @Query('contractId') contractId: string
+    @Query('contractId') contractId: string,
   ) {
     return this.handleRequest(
       () => this.contractService.finalizeContract(contractId),
@@ -168,13 +172,11 @@ export class ContractController {
 
   @UseGuards(JWTAuthGuard)
   @Get('get-contract')
-  getContractById(
-    @Query('contractId') contractId: string
-  ) {
+  getContractById(@Query('contractId') contractId: string) {
     return this.handleRequest(
       () => this.contractService.getContractById(contractId),
       'contracts/get-contract',
-    )
+    );
   }
 
   @UseGuards(JWTAuthGuard)
@@ -183,6 +185,24 @@ export class ContractController {
     return this.handleRequest(
       () => this.contractService.getContract(req.user.email),
       'contracts/get-user-contracts',
+    );
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Get('stats/total-assigned-talents')
+  getTotalAssignedTalents(@Req() req) {
+    return this.handleRequest(
+      () => this.contractService.getTotalAssignedTalents(req.user.email),
+      'contracts/stats/total-assigned-talents',
+    );
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Get('pending-contracts')
+  getPendingContractsCount(@Req() req) {
+    return this.handleRequest(
+      () => this.contractService.getPendingContractsCount(req.user.email),
+      'contracts/pending-contracts',
     );
   }
 

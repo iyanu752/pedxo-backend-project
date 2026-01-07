@@ -110,7 +110,11 @@ export class ContractService {
     }
   }
 
-  private async updateContract(contractId: string, dto: any, nextProgress: string) {
+  private async updateContract(
+    contractId: string,
+    dto: any,
+    nextProgress: string,
+  ) {
     return await this.handleDatabaseOperation(async () => {
       const contract = await this.contractModel.find({ _id: contractId });
       // console.log(contract);
@@ -118,9 +122,8 @@ export class ContractService {
         { _id: contractId },
         { $set: { ...dto, progress: nextProgress } },
         { new: true },
-      )
-    }
-    );
+      );
+    });
   }
 
   async getContract(email: string) {
@@ -131,6 +134,57 @@ export class ContractService {
 
   async getContractById(id: string) {
     return this.handleDatabaseOperation(() => this.contractModel.findById(id));
+  }
+
+  async getTotalAssignedTalents(email: string) {
+    try {
+      const contracts = await this.contractModel.find({ email });
+
+      const totalAssignedTalents = contracts.reduce(
+        (sum, contract) => sum + (contract.talentAssignedId?.length || 0),
+        0,
+      );
+
+      return {
+        error: false,
+        message: 'Total assigned talents fetched successfully',
+        data: {
+          totalAssignedTalents,
+        },
+      };
+    } catch (e) {
+      return {
+        error: true,
+        message: e.message,
+        data: null,
+      };
+    }
+  }
+
+  async getPendingContractsCount(email: string) {
+    try {
+      const pendingContractsCount = await this.contractModel.countDocuments({
+        email,
+        $or: [
+          { talentAssignedId: { $exists: false } },
+          { talentAssignedId: { $size: 0 } },
+        ],
+      });
+
+      return {
+        error: false,
+        message: 'Pending contracts count fetched successfully',
+        data: {
+          pendingContractsCount,
+        },
+      };
+    } catch (e) {
+      return {
+        error: true,
+        message: e.message,
+        data: null,
+      };
+    }
   }
 
   async getAllContracts() {
