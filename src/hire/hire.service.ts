@@ -87,6 +87,7 @@ export class HireService {
       // }
 
       const contract = await this.contractModel.findById(contractId);
+
       if (!contract) {
         return {
           error: true,
@@ -94,10 +95,17 @@ export class HireService {
           data: null,
         };
       }
+
+      if (!contract.isCompleted) {
+        return {
+          error: true,
+          message: 'Contract with this ID is not yet completed',
+          data: null,
+        };
+      }
       for (const id of talentAssignedId) {
-      
         const talentExists = await this.talentRepo.findByTalentId(id);
-       
+
         if (!talentExists) {
           return {
             error: true,
