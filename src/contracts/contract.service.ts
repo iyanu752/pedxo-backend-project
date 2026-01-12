@@ -125,12 +125,17 @@ export class ContractService {
       );
     });
   }
-
-  async getContract(email: string) {
-    return this.handleDatabaseOperation(() =>
-      this.contractModel.find({ email: email }),
-    );
+  async getContract(userId: string) {
+    return this.handleDatabaseOperation(async () => {
+      const contracts = await this.contractModel.find({ userId });
+  
+      return {
+        total: contracts.length,
+        contracts,
+      };
+    });
   }
+  
 
   async getContractById(id: string) {
     return this.handleDatabaseOperation(() => this.contractModel.findById(id));
