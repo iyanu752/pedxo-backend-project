@@ -11,6 +11,8 @@ import { Model } from 'mongoose';
 import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
 import { ContractService } from 'src/contracts/contract.service';
 import { Contract } from 'src/contracts/schemas/contract.schema';
+import { EmailService } from 'src/common/email.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class HireService {
@@ -19,6 +21,8 @@ export class HireService {
     @InjectModel(Contract.name) private contractModel: Model<Contract>,
     private readonly talentRepo: TalentDetailsRepository,
     private readonly contractService: ContractService,
+    private readonly emailService: EmailService,
+    private readonly userService: UserService,
   ) {}
 
   private async _formatAssignedTalents(contractId: string) {
@@ -77,32 +81,25 @@ export class HireService {
 
   async assignTalent(talentAssignedId: string[], contractId: string) {
     try {
-      // const hire = await this.hireModel.findById(hireId);
-      // if (!hire) {
-      //   return {
-      //     error: true,
-      //     message: 'Hire with this ID does not exist',
-      //     data: null,
-      //   };
-      // }
-
       const contract = await this.contractModel.findById(contractId);
 
       if (!contract) {
-        return {
-          error: true,
-          message: 'Contract with this ID does not exist',
-          data: null,
-        };
+        return { error: true, message: 'Contract does not exist', data: null };
       }
+      const user = await this.userService.findUserById(contract.userId);
+
+      const userEmail = user.email;
 
       if (!contract.isCompleted) {
         return {
           error: true,
-          message: 'Contract with this ID is not yet completed',
+          message: 'Contract is not yet completed',
           data: null,
         };
       }
+
+      const talents: any[] = [];
+
       for (const id of talentAssignedId) {
         const talentExists = await this.talentRepo.findByTalentId(id);
 
@@ -113,13 +110,63 @@ export class HireService {
             data: null,
           };
         }
+
+        talents.push(talentExists);
       }
 
       const updatedContract = await this.contractModel.findByIdAndUpdate(
         contractId,
         { $addToSet: { talentAssignedId: { $each: talentAssignedId } } },
-        { new: true }, // Return updated document
+        { new: true },
       );
+
+      // 🔔 Email talents
+      for (const talent of talents) {
+        await this.emailService.sendTalentAssignmentEmail({
+          talentEmail: talent.email,
+          talentName: `${talent.firstName} ${talent.lastName}`,
+          clientName: contract.clientName,
+          companyName: contract.companyName,
+          roleTitle: contract.roleTitle,
+          contractType: contract.contractType,
+        });
+      }
+
+      const recipientEmails = new Set<string>();
+
+      if (contract.email) {
+        recipientEmails.add(contract.email.toLowerCase());
+      }
+
+      if (userEmail) {
+        recipientEmails.add(userEmail.toLowerCase());
+      }
+
+      const formattedTalents = talents.map((t) => ({
+        fullName: `${t.firstName} ${t.lastName}`,
+        email: t.email,
+        roleTitle: t.roleTitle,
+        experienceLevel: t.experienceLevel,
+        location: `${t.city}, ${t.country}`,
+        github: t.githubAccount,
+        portfolio: t.portfolioLink,
+      }));
+
+      // 🔔 Email client/user (deduplicated)
+      for (const email of recipientEmails) {
+        if (!email) continue;
+
+        await this.emailService.sendClientTalentAssignedEmail({
+          to: email,
+          contractId: contract._id.toString(),
+          companyName: contract.companyName,
+          contractType: contract.contractType,
+          roleTitle: contract.roleTitle,
+          startDate: contract.startDate,
+          endDate: contract.endDate,
+          talents: formattedTalents,
+        });
+      }
 
       return {
         error: false,
@@ -127,11 +174,7 @@ export class HireService {
         data: updatedContract,
       };
     } catch (e) {
-      return {
-        error: true,
-        message: e.message,
-        data: null,
-      };
+      return { error: true, message: e.message, data: null };
     }
   }
 
@@ -143,7 +186,7 @@ export class HireService {
       if (!contracts) {
         return {
           error: true,
-          message: 'Hire with this ID does not exist',
+          message: 'Contract with this ID does not exist',
           data: null,
         };
       }

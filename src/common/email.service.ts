@@ -248,4 +248,141 @@ export class EmailService {
       throw new Error('Failed to send email with attachment');
     }
   }
+
+  async sendTalentAssignmentEmail(payload: {
+    talentEmail: string;
+    talentName: string;
+    clientName: string;
+    companyName: string;
+    roleTitle?: string;
+    contractType: string;
+  }) {
+    const emailBody = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color: #0a66c2;">You've Been Assigned to a New Contract 🎉</h2>
+
+      <p>Hello <strong>${payload.talentName}</strong>,</p>
+
+      <p>
+        You’ve been assigned to a new <strong>${payload.contractType}</strong> contract
+        on <strong>Pedxo</strong>.
+      </p>
+
+      <hr />
+
+      <h3>Contract Details</h3>
+      <p><strong>Client:</strong> ${payload.clientName}</p>
+      <p><strong>Company:</strong> ${payload.companyName}</p>
+      <p><strong>Role:</strong> ${payload.roleTitle || 'To be discussed'}</p>
+
+      <hr />
+
+      <p>
+        Please log in to your Pedxo dashboard to review the contract details
+        and take the next steps.
+      </p>
+
+      <p style="margin-top: 24px;">
+        If you have any questions, feel free to reach out.
+      </p>
+
+      <p>
+        Cheers,<br />
+        <strong>The Pedxo Team</strong>
+      </p>
+    </div>
+  `;
+
+    await this.sendMail(
+      payload.talentEmail,
+      'You’ve been assigned to a new contract',
+      emailBody,
+    );
+  }
+
+  async sendClientTalentAssignedEmail(payload: {
+    to: string;
+    contractId: string;
+    companyName: string;
+    contractType: string;
+    roleTitle?: string;
+    startDate: Date;
+    endDate?: Date;
+    talents: {
+      fullName: string;
+      email: string;
+      roleTitle?: string;
+      experienceLevel?: string;
+      location?: string;
+      github?: string;
+      portfolio?: string;
+    }[];
+  }) {
+    const talentsHtml = payload.talents
+      .map(
+        (t, i) => `
+      <tr>
+        <td style="padding:8px;">${i + 1}</td>
+        <td style="padding:8px;">${t.fullName}</td>
+        <td style="padding:8px;">${t.roleTitle || 'N/A'}</td>
+        <td style="padding:8px;">${t.experienceLevel || 'N/A'}</td>
+        <td style="padding:8px;">${t.location || 'N/A'}</td>
+        <td style="padding:8px;">
+          ${t.github ? `<a href="${t.github}">GitHub</a>` : '—'}
+          ${t.portfolio ? ` | <a href="${t.portfolio}">Portfolio</a>` : ''}
+        </td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    const emailBody = `
+    <div style="font-family:Arial,sans-serif;color:#333;">
+      <h2 style="color:#0a66c2;">Talent Assigned Successfully ✅</h2>
+
+      <p>Talent has been assigned to your contract.</p>
+
+      <h3>Contract Summary</h3>
+      <p><strong>Contract ID:</strong> ${payload.contractId}</p>
+      <p><strong>Company:</strong> ${payload.companyName}</p>
+      <p><strong>Contract Type:</strong> ${payload.contractType}</p>
+      <p><strong>Role:</strong> ${payload.roleTitle || 'N/A'}</p>
+      <p>
+        <strong>Duration:</strong>
+        ${payload.startDate.toDateString()}
+        ${payload.endDate ? ` – ${payload.endDate.toDateString()}` : ''}
+      </p>
+
+      <h3>Assigned Talent</h3>
+
+      <table width="100%" border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <thead style="background:#f5f5f5;">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Experience</th>
+            <th>Location</th>
+            <th>Links</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${talentsHtml}
+        </tbody>
+      </table>
+
+      <p style="margin-top:20px;">
+        Log in to your Pedxo dashboard to manage this contract.
+      </p>
+
+      <p><strong>Pedxo Team</strong></p>
+    </div>
+  `;
+
+    await this.sendMail(
+      payload.to,
+      'Talent assigned to your contract',
+      emailBody,
+    );
+  }
 }

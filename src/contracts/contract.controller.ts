@@ -22,7 +22,7 @@ import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import { CloudinaryService } from '../s3service/s3service.service';
 import { ApiConsumes } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
-import { Request, Response } from 'express';
+// import { Request, Response } from 'express';
 // const fileFilter = (req, file, callback) => {
 //   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
 //   if (!allowedTypes.includes(file.mimetype)) {
@@ -39,7 +39,7 @@ import { Request, Response } from 'express';
 //   fileFilter,
 // };
 
-const CONTRACT_DETAILS = 'CONTRACT_DETAILS';
+// const CONTRACT_DETAILS = 'CONTRACT_DETAILS';
 
 @Controller('contracts')
 export class ContractController {
@@ -183,7 +183,7 @@ export class ContractController {
   @Get('get-user-contracts')
   getContract(@Req() req) {
     return this.handleRequest(
-      () => this.contractService.getContract(req.user.userId),
+      () => this.contractService.getContract(req.user._id),
       'contracts/get-user-contracts',
     );
   }
@@ -192,7 +192,7 @@ export class ContractController {
   @Get('stats/total-assigned-talents')
   getTotalAssignedTalents(@Req() req) {
     return this.handleRequest(
-      () => this.contractService.getTotalAssignedTalents(req.user.email),
+      () => this.contractService.getTotalAssignedTalents(req.user._id),
       'contracts/stats/total-assigned-talents',
     );
   }
@@ -201,7 +201,7 @@ export class ContractController {
   @Get('pending-contracts')
   getPendingContractsCount(@Req() req) {
     return this.handleRequest(
-      () => this.contractService.getPendingContractsCount(req.user.email),
+      () => this.contractService.getPendingContractsCount(req.user._id),
       'contracts/pending-contracts',
     );
   }

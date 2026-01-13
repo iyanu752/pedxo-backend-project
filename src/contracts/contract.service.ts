@@ -117,7 +117,13 @@ export class ContractService {
   ) {
     return await this.handleDatabaseOperation(async () => {
       const contract = await this.contractModel.find({ _id: contractId });
-      // console.log(contract);
+      if (!contract) {
+        return {
+          error: true,
+          message: 'Invalid Contract ID',
+          data: null,
+        };
+      }
       return this.contractModel.findOneAndUpdate(
         { _id: contractId },
         { $set: { ...dto, progress: nextProgress } },
@@ -127,23 +133,21 @@ export class ContractService {
   }
   async getContract(userId: string) {
     return this.handleDatabaseOperation(async () => {
-      const contracts = await this.contractModel.find({ userId });
-  
+      const contracts = await this.contractModel.find({ userId: userId });
       return {
         total: contracts.length,
         contracts,
       };
     });
   }
-  
 
   async getContractById(id: string) {
     return this.handleDatabaseOperation(() => this.contractModel.findById(id));
   }
 
-  async getTotalAssignedTalents(email: string) {
+  async getTotalAssignedTalents(userId: string) {
     try {
-      const contracts = await this.contractModel.find({ email });
+      const contracts = await this.contractModel.find({ userId });
 
       const totalAssignedTalents = contracts.reduce(
         (sum, contract) => sum + (contract.talentAssignedId?.length || 0),
@@ -166,10 +170,10 @@ export class ContractService {
     }
   }
 
-  async getPendingContractsCount(email: string) {
+  async getPendingContractsCount(userId: string) {
     try {
       const pendingContractsCount = await this.contractModel.countDocuments({
-        email,
+        userId,
         $or: [
           { talentAssignedId: { $exists: false } },
           { talentAssignedId: { $size: 0 } },
