@@ -324,6 +324,7 @@ export class EmailService {
       <tr>
         <td style="padding:8px;">${i + 1}</td>
         <td style="padding:8px;">${t.fullName}</td>
+         <td style="padding:8px;">${t.email}</td>
         <td style="padding:8px;">${t.roleTitle || 'N/A'}</td>
         <td style="padding:8px;">${t.experienceLevel || 'N/A'}</td>
         <td style="padding:8px;">${t.location || 'N/A'}</td>
@@ -360,6 +361,7 @@ export class EmailService {
           <tr>
             <th>#</th>
             <th>Name</th>
+            <th>Email</th>
             <th>Role</th>
             <th>Experience</th>
             <th>Location</th>
@@ -371,9 +373,14 @@ export class EmailService {
         </tbody>
       </table>
 
-      <p style="margin-top:20px;">
-        Log in to your Pedxo dashboard to manage this contract.
-      </p>
+  <p style="margin-top:20px;">
+  Log in to your Pedxo dashboard to manage this contract:
+  <br />
+    <a href="https://pedxo.com/login" target="_blank" style="color:#0a66c2;">
+    https://pedxo.com/login
+    </a>
+  </p>
+
 
       <p><strong>Pedxo Team</strong></p>
     </div>

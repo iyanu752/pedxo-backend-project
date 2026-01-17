@@ -38,6 +38,7 @@ export class HireService {
           email: talent.email,
           country: talent.country,
           githubAccount: talent.githubAccount,
+          portfolio: talent.portfolioLink,
           paymentRate: contract?.paymentRate,
           paymentFrequency: contract?.paymentFrequency,
           seniorityLevel: contract?.seniorityLevel,

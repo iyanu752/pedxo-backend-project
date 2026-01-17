@@ -53,7 +53,10 @@ export class Contract {
   @Prop()
   signature?: string; // Base64 or URL to saved signature image
 
-  @Prop({ default: 'personal-info', enum: ['personal-info', 'job-details', 'compensation', 'review', 'signed'] }) // Tracks progress
+  @Prop({
+    default: 'personal-info',
+    enum: ['personal-info', 'job-details', 'compensation', 'review', 'signed'],
+  }) // Tracks progress
   progress:
     | 'personal-info'
     | 'job-details'
