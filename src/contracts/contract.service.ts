@@ -11,6 +11,7 @@ import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
 import { ContractEmailDto } from './dto/contract.email.dto';
 import { EmailService } from '../common/email.service';
+import { UpdateContractDto } from './dto/update-contract.dto';
 
 @Injectable()
 export class ContractService {
@@ -203,6 +204,84 @@ export class ContractService {
         throw new NotFoundException('No contracts found');
       }
       return contracts;
+    });
+  }
+
+  async updateSingleContract(contractId: string, dto: UpdateContractDto) {
+    return this.handleDatabaseOperation(async () => {
+      const contract = await this.contractModel.findById(contractId);
+
+      if (!contract) {
+        return {
+          error: true,
+          message: 'Invalid Contract ID',
+          data: null,
+        };
+      }
+
+      const changes: {
+        field: string;
+        oldValue: any;
+        newValue: any;
+      }[] = [];
+
+      const editableFields = [
+        'contractType',
+        'startDate',
+        'endDate',
+        'roleTitle',
+        'seniorityLevel',
+        'scopeOfWork',
+        'paymentRate',
+        'paymentFrequency',
+      ];
+
+      for (const field of editableFields) {
+        if (dto[field] !== undefined) {
+          const oldVal = contract[field];
+          const newVal = dto[field];
+
+          if (String(oldVal) !== String(newVal)) {
+            changes.push({
+              field,
+              oldValue: oldVal,
+              newValue: newVal,
+            });
+          }
+        }
+      }
+
+      const updatedContract = await this.contractModel.findByIdAndUpdate(
+        contractId,
+        {
+          $set: {
+            contractType: dto.contractType,
+            startDate: dto.startDate,
+            endDate: dto.endDate,
+            roleTitle: dto.roleTitle,
+            seniorityLevel: dto.seniorityLevel,
+            scopeOfWork: dto.scopeOfWork,
+            paymentRate: dto.paymentRate,
+            paymentFrequency: dto.paymentFrequency,
+          },
+        },
+        { new: true },
+      );
+
+      if (changes.length > 0) {
+        await this.emailservice.sendContractUpdatedAlert({
+          to: 'victor@pedxo.com',
+          contractId: contract._id.toString(),
+          companyName: contract.companyName,
+          changes,
+        });
+      }
+
+      return {
+        error: false,
+        message: 'Contract updated successfully',
+        data: updatedContract,
+      };
     });
   }
 }

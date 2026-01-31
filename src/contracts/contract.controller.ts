@@ -11,6 +11,7 @@ import {
   Req,
   Query,
   Res,
+  Param,
   // InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,6 +23,7 @@ import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import { CloudinaryService } from '../s3service/s3service.service';
 import { ApiConsumes } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
+import { UpdateContractDto } from './dto/update-contract.dto';
 // import { Request, Response } from 'express';
 // const fileFilter = (req, file, callback) => {
 //   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
@@ -212,6 +214,18 @@ export class ContractController {
     return this.handleRequest(
       () => this.contractService.getAllContracts(),
       'contracts/get-all-contract',
+    );
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Patch(':id')
+  updateSingleContract(
+    @Param('id') contractId: string,
+    @Body() dto: UpdateContractDto,
+  ) {
+    return this.handleRequest(
+      () => this.contractService.updateSingleContract(contractId, dto),
+      'contracts/:id',
     );
   }
 }

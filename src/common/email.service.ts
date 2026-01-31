@@ -392,4 +392,61 @@ export class EmailService {
       emailBody,
     );
   }
+
+  async sendContractUpdatedAlert(payload: {
+    to: string;
+    contractId: string;
+    companyName: string;
+    changes: {
+      field: string;
+      oldValue: any;
+      newValue: any;
+    }[];
+  }) {
+    const changesHtml = payload.changes
+      .map(
+        (c) => `
+      <tr>
+        <td style="padding:8px;">${c.field}</td>
+        <td style="padding:8px;">${c.oldValue ?? '—'}</td>
+        <td style="padding:8px;">${c.newValue ?? '—'}</td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    const emailBody = `
+    <div style="font-family:Arial,sans-serif;color:#333;">
+      <h2 style="color:#d97706;">Contract Updated ⚠️</h2>
+
+      <p>A contract has just been edited.</p>
+
+      <p><strong>Contract ID:</strong> ${payload.contractId}</p>
+      <p><strong>Company:</strong> ${payload.companyName}</p>
+
+      <h3>Updated Fields</h3>
+
+      <table width="100%" border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <thead style="background:#fef3c7;">
+          <tr>
+            <th>Field</th>
+            <th>Previous Value</th>
+            <th>New Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${changesHtml}
+        </tbody>
+      </table>
+
+      <p style="margin-top:20px;">
+        Please review this update in the admin dashboard if necessary.
+      </p>
+
+      <p><strong>Pedxo Ops Team</strong></p>
+    </div>
+  `;
+
+    await this.sendMail(payload.to, 'Contract updated on Pedxo', emailBody);
+  }
 }
