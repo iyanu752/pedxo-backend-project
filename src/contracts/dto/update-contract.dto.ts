@@ -1,4 +1,14 @@
-import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsDateString,
+  IsInt,
+  IsMongoId,
+  Min,
+  Max,
+  IsNotEmpty,
+} from 'class-validator';
 
 export class UpdateContractDto {
   @IsOptional()
@@ -32,4 +42,17 @@ export class UpdateContractDto {
   @IsOptional()
   @IsString()
   paymentFrequency?: string;
+}
+export class DeleteContractDto {
+  @IsMongoId()
+  contractId: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  performanceRating: number;
+
+  @IsString()
+  @IsNotEmpty()
+  terminationReason: string;
 }

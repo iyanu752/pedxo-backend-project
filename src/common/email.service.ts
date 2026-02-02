@@ -449,4 +449,76 @@ export class EmailService {
 
     await this.sendMail(payload.to, 'Contract updated on Pedxo', emailBody);
   }
+
+  async sendContractDeletedEmail(payload: {
+    to: string;
+    contract: {
+      _id: string;
+      companyName: string;
+      roleTitle?: string;
+      contractType: string;
+      clientName: string;
+      email: string;
+      country: string;
+      region?: string;
+      startDate: Date;
+      endDate?: Date;
+      paymentRate: number;
+      paymentFrequency: string;
+      talentAssignedId?: string[];
+    };
+    performanceRating: number;
+    terminationReason: string;
+  }) {
+    const talentList = payload.contract.talentAssignedId?.length
+      ? payload.contract.talentAssignedId.join(', ')
+      : 'None';
+
+    const emailBody = `
+  <div style="font-family:Arial,sans-serif;color:#222;">
+    <h2 style="color:#c0392b;">Contract Terminated ❌</h2>
+
+    <p>A contract has been deleted.</p>
+
+    <h3>Contract Summary</h3>
+    <p><strong>ID:</strong> ${payload.contract._id}</p>
+    <p><strong>Company:</strong> ${payload.contract.companyName}</p>
+    <p><strong>Client:</strong> ${payload.contract.clientName}</p>
+    <p><strong>Email:</strong> ${payload.contract.email}</p>
+    <p><strong>Country:</strong> ${payload.contract.country}</p>
+    ${
+      payload.contract.region
+        ? `<p><strong>Region:</strong> ${payload.contract.region}</p>`
+        : ''
+    }
+
+    <p><strong>Role:</strong> ${payload.contract.roleTitle || 'N/A'}</p>
+    <p><strong>Type:</strong> ${payload.contract.contractType}</p>
+
+    <p><strong>Start Date:</strong> ${payload.contract.startDate.toDateString()}</p>
+    ${
+      payload.contract.endDate
+        ? `<p><strong>End Date:</strong> ${payload.contract.endDate.toDateString()}</p>`
+        : ''
+    }
+
+    <p><strong>Payment:</strong> ${payload.contract.paymentRate} (${payload.contract.paymentFrequency})</p>
+
+    <h3>Assigned Talents (IDs)</h3>
+    <p>${talentList}</p>
+
+    <h3>Termination Review</h3>
+    <p><strong>Performance Rating:</strong> ${payload.performanceRating}/5 ⭐</p>
+    <p><strong>Reason:</strong> ${payload.terminationReason}</p>
+
+    <hr />
+
+    <p style="margin-top:20px;">
+      <strong>Pedxo Admin Alert</strong>
+    </p>
+  </div>
+  `;
+
+    await this.sendMail(payload.to, 'Contract terminated on Pedxo', emailBody);
+  }
 }

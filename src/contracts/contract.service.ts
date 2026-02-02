@@ -11,7 +11,10 @@ import { JobDetailsDto } from './dto/job-details.dto';
 import { CompensationDto } from './dto/compensation.dto';
 import { ContractEmailDto } from './dto/contract.email.dto';
 import { EmailService } from '../common/email.service';
-import { UpdateContractDto } from './dto/update-contract.dto';
+import {
+  DeleteContractDto,
+  UpdateContractDto,
+} from './dto/update-contract.dto';
 
 @Injectable()
 export class ContractService {
@@ -134,7 +137,9 @@ export class ContractService {
   }
   async getContract(userId: string) {
     return this.handleDatabaseOperation(async () => {
-      const contracts = await this.contractModel.find({ userId: userId });
+      const contracts = await this.contractModel
+        .find({ userId })
+        .sort({ updatedAt: -1 });
       return {
         total: contracts.length,
         contracts,
@@ -281,6 +286,44 @@ export class ContractService {
         error: false,
         message: 'Contract updated successfully',
         data: updatedContract,
+      };
+    });
+  }
+
+  async deleteContract(body: DeleteContractDto) {
+    return this.handleDatabaseOperation(async () => {
+      const { contractId, ...review } = body;
+
+      const contract = await this.contractModel.findById(contractId);
+
+      if (!contract) {
+        return {
+          error: true,
+          message: 'Invalid Contract ID',
+          data: null,
+        };
+      }
+
+      // Delete contract
+      await this.contractModel.findByIdAndDelete(contractId);
+
+      // Send deletion alert email
+      await this.emailservice.sendContractDeletedEmail({
+        to: 'victor@pedxo.com',
+        contract: {
+          ...contract.toObject(),
+          _id: contract._id.toString(),
+        },
+        performanceRating: review.performanceRating,
+        terminationReason: review.terminationReason,
+      });
+
+      return {
+        error: false,
+        message: 'Contract deleted successfully',
+        data: {
+          contractId,
+        },
       };
     });
   }

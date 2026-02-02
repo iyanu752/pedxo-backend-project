@@ -12,6 +12,7 @@ import {
   Query,
   Res,
   Param,
+  Delete,
   // InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,7 +24,10 @@ import { JWTAuthGuard } from 'src/auth/customGuard/jwt.guard';
 import { CloudinaryService } from '../s3service/s3service.service';
 import { ApiConsumes } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/auth/customGuard/admin-auth.guard';
-import { UpdateContractDto } from './dto/update-contract.dto';
+import {
+  DeleteContractDto,
+  UpdateContractDto,
+} from './dto/update-contract.dto';
 // import { Request, Response } from 'express';
 // const fileFilter = (req, file, callback) => {
 //   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
@@ -226,6 +230,15 @@ export class ContractController {
     return this.handleRequest(
       () => this.contractService.updateSingleContract(contractId, dto),
       'contracts/:id',
+    );
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Delete('delete-contract')
+  deleteContract(@Body() body: DeleteContractDto) {
+    return this.handleRequest(
+      () => this.contractService.deleteContract(body),
+      'contracts/delete-contract',
     );
   }
 }
