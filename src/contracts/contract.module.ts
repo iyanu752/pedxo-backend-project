@@ -8,16 +8,22 @@ import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { S3serviceModule } from 'src/s3service/s3service.module';
 import { EmailService } from '../common/email.service';
+import {
+  TalentDetails,
+  TalentDetailsSchema,
+} from 'src/talent/schemas/talent-details.schema';
+import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
 @Module({
   imports: [
     AuthModule,
     JwtModule,
     MongooseModule.forFeature([
       { name: Contract.name, schema: ContractSchema },
+      { name: TalentDetails.name, schema: TalentDetailsSchema },
     ]),
     S3serviceModule,
   ],
   controllers: [ContractController],
-  providers: [ContractService, EmailService],
+  providers: [ContractService, EmailService, TalentDetailsRepository],
 })
 export class ContractModule {}

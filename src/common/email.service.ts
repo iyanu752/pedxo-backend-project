@@ -393,6 +393,91 @@ export class EmailService {
     );
   }
 
+  async sendClientContractDeletedEmail(payload: {
+    to: string;
+    contractId: string;
+    companyName: string;
+    roleTitle?: string;
+    contractType: string;
+  }) {
+    const emailBody = `
+  <div style="font-family:Arial,sans-serif;color:#222;line-height:1.6;">
+    <h2 style="color:#c0392b;">Contract Successfully Terminated ❌</h2>
+
+    <p>
+      This is to confirm that your contract on Pedxo has been terminated.
+    </p>
+
+    <hr />
+
+    <h3>Contract Summary</h3>
+    <p><strong>ID:</strong> ${payload.contractId}</p>
+    <p><strong>Company:</strong> ${payload.companyName}</p>
+    <p><strong>Role:</strong> ${payload.roleTitle || 'N/A'}</p>
+    <p><strong>Type:</strong> ${payload.contractType}</p>
+
+    <hr />
+
+    <p>
+      If you have any questions, please contact the Pedxo team.
+    </p>
+
+    <p style="margin-top:24px;">
+      Regards,<br />
+      <strong>Pedxo Team</strong>
+    </p>
+  </div>
+  `;
+
+    await this.sendMail(
+      payload.to,
+      'Your contract has been terminated',
+      emailBody,
+    );
+  }
+
+  async sendTalentContractTerminationEmail(payload: {
+    to: string;
+    fullName: string;
+    companyName: string;
+    roleTitle?: string;
+    contractId: string;
+  }) {
+    const emailBody = `
+    <div style="font-family:Arial,sans-serif;color:#222;line-height:1.6;">
+      <h2 style="color:#c0392b;">Contract Termination Notice ❌</h2>
+
+      <p>Hello <strong>${payload.fullName}</strong>,</p>
+
+      <p>
+        This is to inform you that your assignment with
+        <strong>${payload.companyName}</strong> on Pedxo has been terminated.
+      </p>
+
+      <hr />
+
+      <h3>Contract Details</h3>
+      <p><strong>Contract ID:</strong> ${payload.contractId}</p>
+      <p><strong>Company:</strong> ${payload.companyName}</p>
+      <p><strong>Role:</strong> ${payload.roleTitle || 'N/A'}</p>
+
+      <hr />
+
+      <p>
+        If you believe this is an error or need clarification,
+        please contact the Pedxo support team.
+      </p>
+
+      <p style="margin-top:24px;">
+        Regards,<br />
+        <strong>Pedxo Team</strong>
+      </p>
+    </div>
+  `;
+
+    await this.sendMail(payload.to, 'Contract Terminated on Pedxo', emailBody);
+  }
+
   async sendContractUpdatedAlert(payload: {
     to: string;
     contractId: string;

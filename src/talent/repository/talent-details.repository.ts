@@ -30,7 +30,9 @@ export class TalentDetailsRepository {
   }
 
   async findByTalentId(talentId: string): Promise<TalentDetails | null> {
-    return this.model.findOne({ talentId: new Types.ObjectId(talentId) }).exec();
+    return this.model
+      .findOne({ talentId: new Types.ObjectId(talentId) })
+      .exec();
   }
 
   async updateById(
