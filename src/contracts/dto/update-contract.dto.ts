@@ -61,16 +61,3 @@ export class DeleteContractDto {
   @IsNotEmpty()
   terminationReason: string;
 }
-export class DeleteContractDto {
-  @IsMongoId()
-  contractId: string;
-
-  @IsInt()
-  @Min(1)
-  @Max(5)
-  performanceRating: number;
-
-  @IsString()
-  @IsNotEmpty()
-  terminationReason: string;
-}
