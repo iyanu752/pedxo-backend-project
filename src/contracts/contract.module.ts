@@ -13,6 +13,10 @@ import {
   TalentDetailsSchema,
 } from 'src/talent/schemas/talent-details.schema';
 import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
+import {
+  ContractTermination,
+  ContractTerminationSchema,
+} from './schemas/contract-termination.schema';
 @Module({
   imports: [
     AuthModule,
@@ -20,6 +24,7 @@ import { TalentDetailsRepository } from 'src/talent/repository/talent-details.re
     MongooseModule.forFeature([
       { name: Contract.name, schema: ContractSchema },
       { name: TalentDetails.name, schema: TalentDetailsSchema },
+      { name: ContractTermination.name, schema: ContractTerminationSchema },
     ]),
     S3serviceModule,
   ],

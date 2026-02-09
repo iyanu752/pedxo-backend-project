@@ -13,20 +13,30 @@ export class JWTAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    // 1. Check cookie first
-    let token = request.cookies?.access_token;
+    // // 1. Check cookie first
+    // let token = request.cookies?.access_token;
 
-    // 2. If no cookie, fallback to Bearer token
-    if (!token) {
-      const authHeader = request.headers['authorization'];
-      if (!authHeader) {
-        throw new UnauthorizedException('Unauthorized: No token provided');
-      }
+    // // 2. If no cookie, fallback to Bearer token
+    // if (!token) {
+    //   const authHeader = request.headers['authorization'];
+    //   if (!authHeader) {
+    //     throw new UnauthorizedException('Unauthorized: No token provided');
+    //   }
 
+    //   token = authHeader.split(' ')[1];
+    //   if (!token) {
+    //     throw new UnauthorizedException('Unauthorized: Invalid token format');
+    //   }
+    // }
+
+    const authHeader = request.headers.authorization;
+
+    let token: string | undefined;
+
+    if (authHeader?.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];
-      if (!token) {
-        throw new UnauthorizedException('Unauthorized: Invalid token format');
-      }
+    } else if (request.cookies?.access_token) {
+      token = request.cookies.access_token;
     }
 
     try {
@@ -35,9 +45,16 @@ export class JWTAuthGuard implements CanActivate {
         secret: secretKey,
       });
 
-      // Attach user info to request
+      console.log('Decoded JWT Token:', decodedToken);
+      const userId =
+        decodedToken._id || decodedToken.userId || decodedToken.sub;
+
+      if (!userId) {
+        throw new UnauthorizedException('Token missing user id');
+      }
+
       request.user = {
-        _id: decodedToken._id, // Assuming JWT `sub` contains user ID
+        _id: userId,
         email: decodedToken.email,
       };
 

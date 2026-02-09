@@ -35,6 +35,10 @@ import { PassportModule } from '@nestjs/passport';
 import { TokenService } from 'src/talent/token.service';
 import { FormToken, FormTokenSchema } from 'src/talent/schemas/token.schema';
 import { GithubStrategy } from './strategy/github.strategy';
+import {
+  ContractTermination,
+  ContractTerminationSchema,
+} from 'src/contracts/schemas/contract-termination.schema';
 
 //module decorator
 @Module({
@@ -44,6 +48,7 @@ import { GithubStrategy } from './strategy/github.strategy';
       { name: TalentDetails.name, schema: TalentDetailsSchema },
       { name: Hire.name, schema: HireSchema },
       { name: Contract.name, schema: ContractSchema },
+      { name: ContractTermination.name, schema: ContractTerminationSchema },
       { name: Admin.name, schema: AdminSchema },
       { name: FormToken.name, schema: FormTokenSchema },
     ]),

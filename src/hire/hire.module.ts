@@ -19,6 +19,10 @@ import { User, UserSchema } from 'src/user/schema/user.schema';
 import { OtpService } from 'src/otp/service/otp.service';
 import { CloudinaryService } from 'src/s3service/s3service.service';
 import { OTP, OtpSchema } from 'src/otp/schema/otp.schema';
+import {
+  ContractTermination,
+  ContractTerminationSchema,
+} from 'src/contracts/schemas/contract-termination.schema';
 
 @Module({
   imports: [
@@ -26,6 +30,7 @@ import { OTP, OtpSchema } from 'src/otp/schema/otp.schema';
       { name: Hire.name, schema: HireSchema },
       { name: TalentDetails.name, schema: TalentDetailsSchema },
       { name: Contract.name, schema: ContractSchema },
+      { name: ContractTermination.name, schema: ContractTerminationSchema },
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OtpSchema },
     ]),

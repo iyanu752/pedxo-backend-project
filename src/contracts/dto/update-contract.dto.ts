@@ -47,6 +47,17 @@ export class UpdateContractDto {
   @IsOptional()
   @IsArray()
   removeTalentIds?: string[];
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  performanceRating?: number;
+
+  @IsOptional()
+  @IsString()
+  // @IsNotEmpty()
+  terminationReason?: string;
 }
 export class DeleteContractDto {
   @IsMongoId()

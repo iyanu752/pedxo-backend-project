@@ -16,11 +16,17 @@ import {
   UpdateContractDto,
 } from './dto/update-contract.dto';
 import { TalentDetailsRepository } from 'src/talent/repository/talent-details.repository';
+import {
+  ContractTermination,
+  ContractTerminationDocument,
+} from './schemas/contract-termination.schema';
 
 @Injectable()
 export class ContractService {
   constructor(
     @InjectModel(Contract.name) private contractModel: Model<ContractDocument>,
+    @InjectModel(ContractTermination.name)
+    private terminationModel: Model<ContractTerminationDocument>,
     private emailservice: EmailService,
     private talentRepo: TalentDetailsRepository,
   ) {}
@@ -243,6 +249,9 @@ export class ContractService {
         'paymentFrequency',
       ];
 
+      const updateOps: any = { $set: {} };
+
+      // ---------- Field updates ----------
       for (const field of editableFields) {
         if (dto[field] !== undefined) {
           const oldVal = contract[field];
@@ -254,90 +263,110 @@ export class ContractService {
               oldValue: oldVal,
               newValue: newVal,
             });
+
+            updateOps.$set[field] = newVal;
           }
         }
       }
 
-      // Handle talent removals
-      let removedTalents = [];
+      // ---------- Talent removal ----------
+      let removedTalents: string[] = [];
 
-      if (dto.removeTalentIds?.length) {
-        const existing = contract.talentAssignedId || [];
-
-        removedTalents = existing.filter((id) =>
+      if (dto.removeTalentIds?.length && contract.talentAssignedId?.length) {
+        removedTalents = contract.talentAssignedId.filter((id) =>
           dto.removeTalentIds.includes(id),
         );
 
         if (removedTalents.length) {
+          const newTalentList = contract.talentAssignedId.filter(
+            (id) => !dto.removeTalentIds.includes(id),
+          );
+
           changes.push({
             field: 'talentAssignedId',
-            oldValue: existing,
-            newValue: existing.filter(
-              (id) => !dto.removeTalentIds.includes(id),
-            ),
+            oldValue: contract.talentAssignedId,
+            newValue: newTalentList,
           });
+
+          updateOps.$pull = {
+            talentAssignedId: { $in: removedTalents },
+          };
         }
       }
 
-      const updatedContract = await this.contractModel.findByIdAndUpdate(
-        contractId,
-        {
-          $set: {
-            contractType: dto.contractType,
-            startDate: dto.startDate,
-            endDate: dto.endDate,
-            roleTitle: dto.roleTitle,
-            seniorityLevel: dto.seniorityLevel,
-            scopeOfWork: dto.scopeOfWork,
-            paymentRate: dto.paymentRate,
-            paymentFrequency: dto.paymentFrequency,
-          },
-
-          // remove talents
-          ...(dto.removeTalentIds?.length && {
-            $pull: {
-              talentAssignedId: { $in: dto.removeTalentIds },
-            },
-          }),
-        },
-        { new: true },
-      );
-
-      // Email removed talents
+      // ---------- Validation before DB write ----------
       if (removedTalents.length) {
-        for (const talentId of removedTalents) {
-          const talent = await this.talentRepo.findByTalentId(talentId);
+        if (!dto.performanceRating || !dto.terminationReason) {
+          return {
+            error: true,
+            message:
+              'performanceRating and terminationReason are required when removing talents',
+            data: null,
+          };
+        }
+      }
 
-          if (talent) {
-            await this.emailservice.sendTalentContractTerminationEmail({
+      // ---------- Persist contract update ----------
+      const updatedContract =
+        Object.keys(updateOps.$set).length || updateOps.$pull
+          ? await this.contractModel.findByIdAndUpdate(contractId, updateOps, {
+              new: true,
+            })
+          : contract;
+
+      // ---------- Save termination records ----------
+      if (removedTalents.length) {
+        await Promise.all(
+          removedTalents.map((talentId) =>
+            this.terminationModel.create({
+              contractId: contract._id,
+              userId: contract.userId,
+              talentId,
+              terminationReason: dto.terminationReason,
+              performanceRating: dto.performanceRating,
+              terminatedByEmail: contract.email,
+            }),
+          ),
+        );
+      }
+
+      // ---------- Email removed talents ----------
+      if (removedTalents.length) {
+        const talents = await Promise.all(
+          removedTalents.map((id) => this.talentRepo.findByTalentId(id)),
+        );
+
+        await Promise.all(
+          talents.filter(Boolean).map((talent) =>
+            this.emailservice.sendTalentContractTerminationEmail({
               to: talent.email,
               fullName: `${talent.firstName} ${talent.lastName}`,
               companyName: contract.companyName,
               roleTitle: contract.roleTitle,
               contractId: contract._id.toString(),
-            });
-          }
-        }
+            }),
+          ),
+        );
       }
 
-      // Notify admin + contract owner
-      if (changes.length > 0) {
-        const recipients = new Set<string>();
-
-        recipients.add('victor@pedxo.com');
+      // ---------- Notify admin + client ----------
+      if (changes.length) {
+        const recipients = new Set<string>(['victor@pedxo.com']);
 
         if (contract.email) {
           recipients.add(contract.email.toLowerCase());
         }
 
-        for (const email of recipients) {
-          await this.emailservice.sendContractUpdatedAlert({
-            to: email,
-            contractId: contract._id.toString(),
-            companyName: contract.companyName,
-            changes,
-          });
-        }
+        await Promise.all(
+          [...recipients].map((email) =>
+            this.emailservice.sendContractUpdatedAlert({
+              to: email,
+              contractId: contract._id.toString(),
+              companyName: contract.companyName,
+              changes,
+            }),
+          ),
+        );
       }
 
       return {
@@ -399,6 +428,19 @@ export class ContractService {
         roleTitle: contract.roleTitle,
         contractType: contract.contractType,
       });
+
+      if (contract.talentAssignedId?.length) {
+        for (const talentId of contract.talentAssignedId) {
+          await this.terminationModel.create({
+            contractId: contract._id,
+            userId: contract.userId,
+            talentId,
+            terminationReason,
+            performanceRating,
+            terminatedByEmail: contract.email,
+          });
+        }
+      }
 
       // Delete after all emails
       await this.contractModel.findByIdAndDelete(contractId);

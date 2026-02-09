@@ -524,11 +524,11 @@ export class EmailService {
         </tbody>
       </table>
 
-      <p style="margin-top:20px;">
-        Please review this update in the admin dashboard if necessary.
-      </p>
+      // <p style="margin-top:20px;">
+      //   Please review this update in the admin dashboard if necessary.
+      // </p>
 
-      <p><strong>Pedxo Ops Team</strong></p>
+      <p><strong>Pedxo Support Team</strong></p>
     </div>
   `;
 
