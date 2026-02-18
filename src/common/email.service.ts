@@ -487,6 +487,11 @@ export class EmailService {
       oldValue: any;
       newValue: any;
     }[];
+    terminationSummary?: {
+      talentName: string;
+      performanceRating: number;
+      terminationReason: string;
+    }[];
   }) {
     const changesHtml = payload.changes
       .map(
@@ -499,6 +504,25 @@ export class EmailService {
     `,
       )
       .join('');
+
+    const terminationHtml =
+      payload.terminationSummary && payload.terminationSummary.length
+        ? `
+      <h3 style="margin-top:25px;">Talent Termination Review</h3>
+
+      ${payload.terminationSummary
+        .map(
+          (t) => `
+            <div style="margin-bottom:15px;padding:10px;border:1px solid #eee;">
+              <p><strong>Talent:</strong> ${t.talentName}</p>
+              <p><strong>Performance Rating:</strong> ${t.performanceRating}/5</p>
+              <p><strong>Reason:</strong> ${t.terminationReason}</p>
+            </div>
+          `,
+        )
+        .join('')}
+    `
+        : '';
 
     const emailBody = `
     <div style="font-family:Arial,sans-serif;color:#333;">
@@ -522,7 +546,9 @@ export class EmailService {
         <tbody>
           ${changesHtml}
         </tbody>
-      </table>
+     </table>
+
+     ${terminationHtml}
 
       // <p style="margin-top:20px;">
       //   Please review this update in the admin dashboard if necessary.

@@ -314,43 +314,53 @@ export class ContractService {
             })
           : contract;
 
-      // ---------- Save termination records ----------
-      if (removedTalents.length) {
-        await Promise.all(
-          removedTalents.map((talentId) =>
-            this.terminationModel.create({
-              contractId: contract._id,
-              userId: contract.userId,
-              talentId,
-              terminationReason: dto.terminationReason,
-              performanceRating: dto.performanceRating,
-              terminatedByEmail: contract.email,
-            }),
-          ),
-        );
-      }
+      const terminationSummary: {
+        talentName: string;
+        performanceRating: number;
+        terminationReason: string;
+      }[] = [];
 
-      // ---------- Email removed talents ----------
+      // ---------- Save termination records + fetch talents ----------
       if (removedTalents.length) {
         const talents = await Promise.all(
           removedTalents.map((id) => this.talentRepo.findByTalentId(id)),
         );
 
         await Promise.all(
-          talents.filter(Boolean).map((talent) =>
-            this.emailservice.sendTalentContractTerminationEmail({
+          talents.filter(Boolean).map(async (talent) => {
+            const fullName = `${talent.firstName} ${talent.lastName}`;
+
+            terminationSummary.push({
+              talentName: fullName,
+              performanceRating: dto.performanceRating,
+              terminationReason: dto.terminationReason,
+            });
+
+            await this.terminationModel.create({
+              contractId: contract._id,
+              userId: contract.userId,
+              talentId: talent.talentId,
+              talentName: fullName,
+              companyName: contract.companyName,
+              terminationReason: dto.terminationReason,
+              performanceRating: dto.performanceRating,
+              terminatedByEmail: contract.email,
+            });
+
+            // Send talent email
+            await this.emailservice.sendTalentContractTerminationEmail({
               to: talent.email,
-              fullName: `${talent.firstName} ${talent.lastName}`,
+              fullName,
               companyName: contract.companyName,
               roleTitle: contract.roleTitle,
               contractId: contract._id.toString(),
-            }),
-          ),
+            });
+          }),
         );
       }
 
       // ---------- Notify admin + client ----------
-      if (changes.length) {
+      if (changes.length || terminationSummary.length) {
         const recipients = new Set<string>(['victor@pedxo.com']);
 
         if (contract.email) {
@@ -364,6 +374,7 @@ export class ContractService {
               contractId: contract._id.toString(),
               companyName: contract.companyName,
               changes,
+              terminationSummary,
             }),
           ),
         );

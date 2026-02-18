@@ -15,6 +15,12 @@ export class ContractTermination {
   talentId: Types.ObjectId;
 
   @Prop({ required: true })
+  talentName: string;
+
+  @Prop({ required: true })
+  companyName: string;
+
+  @Prop({ required: true })
   terminationReason: string;
 
   @Prop({ required: true, min: 1, max: 5 })
