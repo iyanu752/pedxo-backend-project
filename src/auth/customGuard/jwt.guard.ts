@@ -45,7 +45,7 @@ export class JWTAuthGuard implements CanActivate {
         secret: secretKey,
       });
 
-      console.log('Decoded JWT Token:', decodedToken);
+      // console.log('Decoded JWT Token:', decodedToken);
       const userId =
         decodedToken._id || decodedToken.userId || decodedToken.sub;
 

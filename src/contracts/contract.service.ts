@@ -273,13 +273,13 @@ export class ContractService {
       let removedTalents: string[] = [];
 
       if (dto.removeTalentIds?.length && contract.talentAssignedId?.length) {
-        removedTalents = contract.talentAssignedId.filter((id) =>
-          dto.removeTalentIds.includes(id),
-        );
+        removedTalents = contract.talentAssignedId
+          .map((id) => id.toString()) // ✅ Fix ObjectId comparison
+          .filter((id) => dto.removeTalentIds.includes(id));
 
         if (removedTalents.length) {
           const newTalentList = contract.talentAssignedId.filter(
-            (id) => !dto.removeTalentIds.includes(id),
+            (id) => !removedTalents.includes(id.toString()),
           );
 
           changes.push({
@@ -320,46 +320,62 @@ export class ContractService {
         terminationReason: string;
       }[] = [];
 
-      // ---------- Save termination records + fetch talents ----------
+      // ---------- Save termination records + send talent emails ----------
       if (removedTalents.length) {
         const talents = await Promise.all(
-          removedTalents.map((id) => this.talentRepo.findByTalentId(id)),
+          removedTalents.map((id) =>
+            this.talentRepo.findByTalentId(id).catch((err) => {
+              console.error('Talent fetch failed:', err);
+              return null;
+            }),
+          ),
         );
 
         await Promise.all(
           talents.filter(Boolean).map(async (talent) => {
-            const fullName = `${talent.firstName} ${talent.lastName}`;
+            try {
+              const fullName = `${talent.firstName} ${talent.lastName}`;
 
-            terminationSummary.push({
-              talentName: fullName,
-              performanceRating: dto.performanceRating,
-              terminationReason: dto.terminationReason,
-            });
+              terminationSummary.push({
+                talentName: fullName,
+                performanceRating: dto.performanceRating,
+                terminationReason: dto.terminationReason,
+              });
 
-            await this.terminationModel.create({
-              contractId: contract._id,
-              userId: contract.userId,
-              talentId: talent.talentId,
-              talentName: fullName,
-              companyName: contract.companyName,
-              terminationReason: dto.terminationReason,
-              performanceRating: dto.performanceRating,
-              terminatedByEmail: contract.email,
-            });
+              await this.terminationModel.create({
+                contractId: contract._id,
+                userId: contract.userId,
+                talentId: talent.talentId,
+                talentName: fullName,
+                companyName: contract.companyName,
+                terminationReason: dto.terminationReason,
+                performanceRating: dto.performanceRating,
+                terminatedByEmail: contract.email,
+              });
 
-            // Send talent email
-            await this.emailservice.sendTalentContractTerminationEmail({
-              to: talent.email,
-              fullName,
-              companyName: contract.companyName,
-              roleTitle: contract.roleTitle,
-              contractId: contract._id.toString(),
-            });
+              // ✅ Send talent email safely
+              await this.emailservice
+                .sendTalentContractTerminationEmail({
+                  to: talent.email,
+                  fullName,
+                  companyName: contract.companyName,
+                  roleTitle: contract.roleTitle,
+                  contractId: contract._id.toString(),
+                })
+                .catch((err) =>
+                  console.error(
+                    `Talent email failed for ${talent.email}:`,
+                    err,
+                  ),
+                );
+            } catch (err) {
+              console.error('Termination processing failed:', err);
+            }
           }),
         );
       }
 
-      // ---------- Notify admin + client ----------
+      // ---------- Notify admin + client (always runs) ----------
       if (changes.length || terminationSummary.length) {
         const recipients = new Set<string>(['victor@pedxo.com']);
 
@@ -369,13 +385,17 @@ export class ContractService {
 
         await Promise.all(
           [...recipients].map((email) =>
-            this.emailservice.sendContractUpdatedAlert({
-              to: email,
-              contractId: contract._id.toString(),
-              companyName: contract.companyName,
-              changes,
-              terminationSummary,
-            }),
+            this.emailservice
+              .sendContractUpdatedAlert({
+                to: email,
+                contractId: contract._id.toString(),
+                companyName: contract.companyName,
+                changes,
+                terminationSummary,
+              })
+              .catch((err) =>
+                console.error(`Admin/Client email failed for ${email}:`, err),
+              ),
           ),
         );
       }
