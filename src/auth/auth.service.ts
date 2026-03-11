@@ -289,8 +289,9 @@ export class AuthService {
     user.randomToken = randomToken;
     await user.save();
     return {
-      user,
+      result: user,
       accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -326,8 +327,9 @@ export class AuthService {
     user.randomToken = randomToken;
     await user.save();
     return {
-      user,
+      result: user,
       accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 }
