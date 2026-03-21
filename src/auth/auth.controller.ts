@@ -26,6 +26,7 @@ import { CurrentUser } from 'src/common/decorator/current.logged.user';
 import { User } from 'src/user/schema/user.schema';
 import { AuthGuard as Guard } from '@nestjs/passport';
 import { Response } from 'express';
+import { GoogleAuthGuard } from './customGuard/google.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -101,7 +102,8 @@ export class AuthController {
   // }
 
   @Get('google/redirect')
-  @UseGuards(Guard('google'))
+  // @UseGuards(Guard('google'))
+  @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     try {
       if (req.query?.error) {
