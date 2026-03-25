@@ -67,6 +67,7 @@ export class ContractService {
         userId,
         ...dto,
         progress: 'job-details',
+        status: 'pending',
       });
       // console.log('contract', contract);
       return contract.save();

@@ -115,11 +115,19 @@ export class HireService {
         talents.push(talentExists);
       }
 
-      const updatedContract = await this.contractModel.findByIdAndUpdate(
+      let updatedContract = await this.contractModel.findByIdAndUpdate(
         contractId,
         { $addToSet: { talentAssignedId: { $each: talentAssignedId } } },
         { new: true },
       );
+
+      if (updatedContract.talentAssignedId?.length > 0) {
+        updatedContract = await this.contractModel.findByIdAndUpdate(
+          contractId,
+          { $set: { status: 'assigned' } },
+          { new: true },
+        );
+      }
 
       // 🔔 Email talents
       for (const talent of talents) {

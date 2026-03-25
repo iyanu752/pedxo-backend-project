@@ -64,6 +64,12 @@ export class Contract {
     | 'review'
     | 'signed';
 
+  @Prop({
+    default: 'pending',
+    enum: ['pending', 'assigned', 'completed'],
+  })
+  status: 'pending' | 'assigned' | 'completed';
+
   @Prop({ default: false }) // Marks contract as completed
   isCompleted: boolean;
 
